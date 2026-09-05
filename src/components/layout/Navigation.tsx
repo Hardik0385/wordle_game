@@ -23,8 +23,18 @@ export function Navigation() {
     <>
       {/* Desktop Navigation */}
       <nav className="hidden md:flex flex-col w-64 h-screen border-r border-[var(--surface-border)] bg-[var(--surface)] p-4 sticky top-0 transition-colors">
-        <Link href="/" className="mb-8 font-black tracking-widest text-2xl text-center text-[var(--foreground)] hover:opacity-90">
-          WORDLY
+        <Link href="/" className="mb-8 flex items-center gap-3 px-2 group">
+          <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-[#2ec47d] to-[#10b981] flex items-center justify-center text-white font-black text-xl shadow-lg shadow-[#2ec47d]/25 group-hover:scale-105 transition-transform">
+            W
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="font-black tracking-wider text-2xl text-[var(--foreground)] group-hover:opacity-90 leading-tight">
+              WORDLY
+            </span>
+            <span className="text-[10px] font-extrabold text-[#2ec47d] tracking-widest uppercase">
+              Word Game
+            </span>
+          </div>
         </Link>
         <div className="flex flex-col gap-2">
           {navItems.map((item) => {

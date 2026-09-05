@@ -3,13 +3,21 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/layout/Navigation";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
+import { NamePromptModal } from "@/components/player/NamePromptModal";
 import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "WORDLY - Personalized Word Puzzle Experience",
-  description: "A premium modern word game platform.",
+  title: {
+    default: "WORDLY — Daily Word Puzzle Game",
+    template: "%s | WORDLY",
+  },
+  description: "Play classic Wordle, timed rush, chaos modifiers, survival challenges, and unlimited daily word puzzles with custom themes, multi-language support, and stats.",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -26,6 +34,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} flex flex-col md:flex-row min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300`}>
         <ThemeProvider>
+          <NamePromptModal />
           <Navigation />
           <div className="flex-1 pb-20 md:pb-0 overflow-y-auto">
             {children}

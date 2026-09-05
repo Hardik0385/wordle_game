@@ -22,7 +22,7 @@ export default function StatsPage() {
     <main className="p-4 sm:p-8 max-w-4xl mx-auto flex flex-col gap-8">
       <header>
         <h1 className="text-3xl font-extrabold mb-2">Statistics</h1>
-        <p className="text-gray-500">Track your progress, {name}</p>
+        <p className="text-gray-500">Track your progress, {name || 'Player'}</p>
       </header>
 
       {/* Overview Cards */}

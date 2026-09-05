@@ -21,7 +21,7 @@ export default function Home() {
         <div className="h-20 w-20 bg-[var(--surface)] border border-[var(--surface-border)] rounded-full mb-4 flex items-center justify-center text-3xl shadow-inner">
           👋
         </div>
-        <h1 className="text-3xl font-black text-[var(--foreground)]">{getTranslation(interfaceLanguage, 'welcome_back')}, {name}</h1>
+        <h1 className="text-3xl font-black text-[var(--foreground)]">{getTranslation(interfaceLanguage, 'welcome_back')}, {name || 'Player'}</h1>
         <p className="text-[var(--foreground-muted)] mt-1 text-sm font-semibold">
           Level {stats.level} • {stats.totalXP.toLocaleString()} XP
         </p>

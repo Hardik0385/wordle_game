@@ -15,11 +15,13 @@ export interface GameStats {
 
 interface PlayerState {
   name: string;
+  hasPromptedName: boolean;
   stats: GameStats;
   
   // Actions
   recordGameResult: (won: boolean, numGuesses: number, durationSeconds?: number) => void;
   setName: (name: string) => void;
+  setHasPromptedName: (hasPrompted: boolean) => void;
 }
 
 const INITIAL_STATS: GameStats = {
@@ -39,10 +41,12 @@ import { toast } from 'react-hot-toast';
 export const usePlayerStore = create<PlayerState>()(
   persist(
     (set, get) => ({
-      name: 'Hardik',
+      name: '',
+      hasPromptedName: false,
       stats: INITIAL_STATS,
 
       setName: (name) => set({ name }),
+      setHasPromptedName: (hasPromptedName) => set({ hasPromptedName }),
 
       recordGameResult: (won, numGuesses, durationSeconds) => {
         const { stats } = get();
@@ -108,6 +112,19 @@ export const usePlayerStore = create<PlayerState>()(
     }),
     {
       name: 'wordly-player-storage',
+      version: 2,
+      migrate: (persistedState: any, version: number) => {
+        if (version < 2) {
+          const oldName = persistedState?.name;
+          const isHardcodedDefault = oldName === 'Hardik';
+          return {
+            ...persistedState,
+            name: isHardcodedDefault ? '' : (oldName || ''),
+            hasPromptedName: !isHardcodedDefault && !!oldName,
+          };
+        }
+        return persistedState;
+      },
     }
   )
 );
