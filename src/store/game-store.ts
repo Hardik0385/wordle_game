@@ -5,6 +5,12 @@ import { isValidWord, getRandomWord, validateHardMode } from '../engine/word-val
 import { usePlayerStore } from './player-store';
 import { useSettingsStore } from './settings-store';
 import { sounds } from '../lib/sound';
+import { formatHintMessage, formatNoHintsLeft, formatAllRevealed } from '../lib/translations';
+
+export interface PositionHint {
+  index: number;
+  letter: string;
+}
 
 export type GameStatus = 'playing' | 'won' | 'lost';
 export type GameMode = 'classic' | 'daily' | 'unlimited' | 'timed' | 'survival' | 'endless' | 'chaos' | 'custom';
@@ -45,7 +51,7 @@ interface GameState {
   currentGuess: string;
   status: GameStatus;
   error: string | null;
-  hints: string[];
+  hints: PositionHint[];
   hintsRemaining: number;
 
   // Timed & Stopwatch
@@ -453,29 +459,66 @@ export const useGameStore = create<GameState>()(
       clearError: () => set({ error: null }),
 
       useHint: () => {
-        const { targetWord, hints, status, hintsRemaining } = get();
+        const { targetWord, hints, status, hintsRemaining, guesses } = get();
         if (status !== 'playing') return;
 
+        const lang = useSettingsStore.getState().interfaceLanguage;
+
         if (hintsRemaining <= 0) {
-          set({ error: 'No hints left (Max 2 free hints per game)' });
+          set({ error: formatNoHintsLeft(lang) });
           return;
         }
 
-        const targetLetters = targetWord.split('');
-        const unrevealedLetters = targetLetters.filter(l => !hints.includes(l));
+        // Normalize existing hints in case of legacy string format
+        const validHints = hints.filter(h => typeof h === 'object' && h !== null);
+        const alreadyHintedIndices = new Set(validHints.map(h => h.index));
 
-        if (unrevealedLetters.length === 0) {
-          set({ error: 'All letters already revealed' });
+        // Find positions already correctly identified by past guesses
+        const correctlyGuessedIndices = new Set<number>();
+        for (const guess of guesses) {
+          for (let i = 0; i < guess.length && i < targetWord.length; i++) {
+            if (guess[i] === targetWord[i]) {
+              correctlyGuessedIndices.add(i);
+            }
+          }
+        }
+
+        // Candidates: positions neither already hinted nor already guessed correctly
+        const availableIndices: number[] = [];
+        for (let i = 0; i < targetWord.length; i++) {
+          if (!alreadyHintedIndices.has(i) && !correctlyGuessedIndices.has(i)) {
+            availableIndices.push(i);
+          }
+        }
+
+        // Fallback: any un-hinted position
+        if (availableIndices.length === 0) {
+          for (let i = 0; i < targetWord.length; i++) {
+            if (!alreadyHintedIndices.has(i)) {
+              availableIndices.push(i);
+            }
+          }
+        }
+
+        if (availableIndices.length === 0) {
+          set({ error: formatAllRevealed(lang) });
           return;
         }
 
-        const hintLetter = unrevealedLetters[Math.floor(Math.random() * unrevealedLetters.length)];
+        // Pick one of the available positions
+        const chosenIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+        const hintLetter = targetWord[chosenIndex];
         const remaining = hintsRemaining - 1;
 
+        const newHint: PositionHint = {
+          index: chosenIndex,
+          letter: hintLetter,
+        };
+
         set({ 
-          hints: [...hints, hintLetter], 
+          hints: [...validHints, newHint], 
           hintsRemaining: remaining,
-          error: `Hint: Word contains '${hintLetter}' (${remaining} left)` 
+          error: formatHintMessage(lang, chosenIndex + 1, hintLetter, remaining)
         });
       }
     }),

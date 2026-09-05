@@ -9,12 +9,13 @@ interface TileProps {
   letter?: string;
   state?: EvaluatedLetter['state'];
   isCurrent?: boolean;
+  isHint?: boolean;
   fogged?: boolean;
   overrideShape?: 'rounded' | 'square' | 'circle';
   overrideFont?: 'fredoka' | 'righteous' | 'mono' | 'heavy';
 }
 
-export function Tile({ letter, state, isCurrent, fogged, overrideShape, overrideFont }: TileProps) {
+export function Tile({ letter, state, isCurrent, isHint, fogged, overrideShape, overrideFont }: TileProps) {
   const { tileShape: storeShape, letterFont: storeFont, colorblindMode, animationSpeed } = useSettingsStore();
 
   const shape = overrideShape || storeShape;
@@ -46,10 +47,12 @@ export function Tile({ letter, state, isCurrent, fogged, overrideShape, override
         },
         // State coloring
         {
+          // Hint placeholder tile (revealed letter at correct position, awaiting user input)
+          "border-dashed border-amber-500/80 bg-amber-500/10 text-amber-500 dark:text-amber-300 font-black shadow-sm": !state && isHint,
           // Empty tile (both inactive or waiting for letter)
-          "border-[var(--tile-border-empty)] bg-[var(--tile-bg-empty)] text-[var(--foreground)]": !state && !letter,
+          "border-[var(--tile-border-empty)] bg-[var(--tile-bg-empty)] text-[var(--foreground)]": !state && !letter && !isHint,
           // Typing active letter tile
-          "border-[#818384] bg-[var(--tile-bg-empty)] text-[var(--foreground)] scale-105 shadow-sm": !state && !!letter,
+          "border-[#818384] bg-[var(--tile-bg-empty)] text-[var(--foreground)] scale-105 shadow-sm": !state && !!letter && !isHint,
           // Fogged in chaos mode
           "border-slate-500 bg-[var(--tile-bg-absent)] text-[var(--tile-text-absent)] opacity-70": fogged && state,
           // Absent (greyed out)
@@ -64,6 +67,9 @@ export function Tile({ letter, state, isCurrent, fogged, overrideShape, override
       )}
     >
       {letter}
+      {isHint && !state && (
+        <span className="absolute top-0.5 right-1 text-[8px] select-none leading-none opacity-80">💡</span>
+      )}
       {colorblindMode && !fogged && state === 'correct' && (
         <span className="absolute top-1 right-1 text-[9px] font-black text-white/90 leading-none select-none">✓</span>
       )}

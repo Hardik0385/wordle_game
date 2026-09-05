@@ -48,4 +48,39 @@ describe('game-store timer and guess mechanics', () => {
     expect(stateAfter.status).toBe('lost');
     expect(stateAfter.timerSeconds).toBe(0);
   });
+
+  it('useHint reveals a letter with its exact position and decrements hintsRemaining', () => {
+    const store = useGameStore.getState();
+    store.resetGame('CRANE');
+
+    expect(useGameStore.getState().hintsRemaining).toBe(2);
+    expect(useGameStore.getState().hints).toHaveLength(0);
+
+    useGameStore.getState().useHint();
+
+    const state1 = useGameStore.getState();
+    expect(state1.hintsRemaining).toBe(1);
+    expect(state1.hints).toHaveLength(1);
+    const hint1 = state1.hints[0];
+    expect(hint1.index).toBeGreaterThanOrEqual(0);
+    expect(hint1.index).toBeLessThan(5);
+    expect('CRANE'[hint1.index]).toBe(hint1.letter);
+    expect(state1.error).toContain(`Letter at position ${hint1.index + 1} is '${hint1.letter}'`);
+
+    // Use second hint
+    useGameStore.getState().useHint();
+    const state2 = useGameStore.getState();
+    expect(state2.hintsRemaining).toBe(0);
+    expect(state2.hints).toHaveLength(2);
+    const hint2 = state2.hints[1];
+    expect(hint2.index).not.toBe(hint1.index);
+    expect('CRANE'[hint2.index]).toBe(hint2.letter);
+
+    // Attempting third hint should error and not decrement
+    useGameStore.getState().useHint();
+    const state3 = useGameStore.getState();
+    expect(state3.hintsRemaining).toBe(0);
+    expect(state3.hints).toHaveLength(2);
+    expect(state3.error).toContain('No hints left');
+  });
 });

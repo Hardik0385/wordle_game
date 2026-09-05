@@ -16,7 +16,7 @@ const ROWS = [
 ];
 
 export function Keyboard() {
-  const { addLetter, removeLetter, submitGuess, guesses, targetWord } = useGameStore();
+  const { addLetter, removeLetter, submitGuess, guesses, targetWord, hints } = useGameStore();
   const colorblindMode = useSettingsStore(state => state.colorblindMode);
 
   // Determine keyboard letter states based on past guesses
@@ -35,6 +35,13 @@ export function Keyboard() {
         letterStates.set(e.letter, 'absent');
       }
     });
+  });
+
+  // Any revealed position hint letter is by definition 'correct' in the target word
+  hints.forEach(h => {
+    if (h && typeof h === 'object' && h.letter) {
+      letterStates.set(h.letter, 'correct');
+    }
   });
 
   const handleKey = useCallback((key: string) => {

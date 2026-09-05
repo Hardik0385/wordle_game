@@ -302,3 +302,42 @@ export function getTranslation(lang: string = 'English', key: string): string {
   const language = (lang in TRANSLATIONS ? lang : 'English') as SupportedLanguage;
   return TRANSLATIONS[language]?.[key] || TRANSLATIONS.English[key] || key;
 }
+
+export function formatHintMessage(lang: string = 'English', pos: number, letter: string, remaining: number): string {
+  switch (lang) {
+    case 'Español':
+      return `💡 Pista: La posición ${pos} es '${letter}' (quedan ${remaining})`;
+    case 'Français':
+      return `💡 Indice : La position ${pos} est '${letter}' (${remaining} restant)`;
+    case 'Deutsch':
+      return `💡 Hinweis: Position ${pos} ist '${letter}' (${remaining} übrig)`;
+    default:
+      return `💡 Hint: Letter at position ${pos} is '${letter}' (${remaining} left)`;
+  }
+}
+
+export function formatNoHintsLeft(lang: string = 'English'): string {
+  switch (lang) {
+    case 'Español':
+      return 'No quedan pistas (Máx. 2 pistas gratis por partida)';
+    case 'Français':
+      return 'Aucun indice restant (Max 2 indices gratuits par partie)';
+    case 'Deutsch':
+      return 'Keine Hinweise mehr übrig (Max. 2 kostenlose Hinweise pro Spiel)';
+    default:
+      return 'No hints left (Max 2 free hints per game)';
+  }
+}
+
+export function formatAllRevealed(lang: string = 'English'): string {
+  switch (lang) {
+    case 'Español':
+      return '¡Todas las posiciones ya han sido reveladas!';
+    case 'Français':
+      return 'Toutes les positions sont déjà révélées !';
+    case 'Deutsch':
+      return 'Alle Buchstabenpositionen sind bereits bekannt!';
+    default:
+      return 'All letter positions are already revealed!';
+  }
+}

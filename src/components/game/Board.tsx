@@ -18,6 +18,7 @@ export function Board() {
     clearError, 
     useHint, 
     hintsRemaining,
+    hints,
     status,
     gameMode,
     chaosModifier
@@ -81,13 +82,21 @@ export function Board() {
             animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
             transition={{ duration: 0.4 }}
           >
-            {Array(targetWord.length).fill(null).map((_, i) => (
-              <Tile
-                key={i}
-                letter={currentGuess[i]}
-                isCurrent={true}
-              />
-            ))}
+            {Array(targetWord.length).fill(null).map((_, i) => {
+              const hintAtPos = hints.find(h => typeof h === 'object' && h !== null && h.index === i);
+              const hasTyped = !!currentGuess[i];
+              const displayLetter = currentGuess[i] || (hintAtPos ? hintAtPos.letter : undefined);
+              const isHint = !hasTyped && !!hintAtPos;
+
+              return (
+                <Tile
+                  key={i}
+                  letter={displayLetter}
+                  isHint={isHint}
+                  isCurrent={true}
+                />
+              );
+            })}
           </motion.div>
         )}
 
@@ -100,8 +109,20 @@ export function Board() {
         ))}
       </div>
 
-      {/* Floating Free Hint Capsule - positioned matching Image 3 */}
-      <div className="w-full max-w-[20rem] flex justify-end mt-4">
+      {/* Floating Free Hint Capsule & Position Badges */}
+      <div className="w-full max-w-[20rem] flex items-center justify-between gap-2 mt-4">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {hints.map((h, idx) => (
+            <span 
+              key={idx} 
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-500 dark:text-amber-300 font-extrabold text-[11px] shadow-sm animate-in fade-in zoom-in-95 duration-200"
+            >
+              <span>💡 Pos {h.index + 1}:</span>
+              <span className="text-xs uppercase underline underline-offset-2">{h.letter}</span>
+            </span>
+          ))}
+        </div>
+
         <button 
           type="button"
           tabIndex={-1}
@@ -111,7 +132,7 @@ export function Board() {
             useHint();
           }}
           disabled={hintsRemaining <= 0 || status !== 'playing'}
-          className="flex items-center gap-1.5 text-xs font-black bg-[var(--surface)] hover:bg-[var(--surface-border)] text-[var(--foreground)] border border-[var(--surface-border)] px-4 py-2 rounded-full shadow-lg transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed outline-none focus:outline-none"
+          className="flex items-center gap-1.5 text-xs font-black bg-[var(--surface)] hover:bg-[var(--surface-border)] text-[var(--foreground)] border border-[var(--surface-border)] px-4 py-2 rounded-full shadow-lg transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed outline-none focus:outline-none shrink-0 ml-auto"
         >
           <span className="text-yellow-400 text-sm">💡</span>
           <span>{getTranslation(interfaceLanguage, 'hint')}</span>
