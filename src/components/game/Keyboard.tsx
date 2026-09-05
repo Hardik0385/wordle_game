@@ -59,8 +59,12 @@ export function Keyboard() {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       
       if (e.key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
         handleKey('ENTER');
       } else if (e.key === 'Backspace') {
+        e.preventDefault();
+        e.stopPropagation();
         handleKey('BACKSPACE');
       } else if (/^[a-zA-Z]$/.test(e.key)) {
         handleKey(e.key.toUpperCase());
@@ -82,9 +86,15 @@ export function Keyboard() {
             return (
               <button
                 key={key}
-                onClick={() => handleKey(key)}
+                type="button"
+                tabIndex={-1}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={(e) => {
+                  (e.currentTarget as HTMLButtonElement)?.blur();
+                  handleKey(key);
+                }}
                 className={cn(
-                  "flex items-center justify-center rounded-xl font-extrabold uppercase transition-all h-12 sm:h-14 flex-1 max-w-[2.6rem] sm:max-w-[3.2rem] shadow-sm active:scale-95",
+                  "flex items-center justify-center rounded-xl font-extrabold uppercase transition-all h-12 sm:h-14 flex-1 max-w-[2.6rem] sm:max-w-[3.2rem] shadow-sm active:scale-95 outline-none focus:outline-none",
                   {
                     "max-w-[4rem] sm:max-w-[4.8rem] px-1 text-[11px] sm:text-xs tracking-wider": isSpecial,
                     "bg-[var(--key-bg)] hover:brightness-110 text-[var(--key-text)]": !state,

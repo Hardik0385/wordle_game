@@ -48,11 +48,11 @@ interface GameState {
   hints: string[];
   hintsRemaining: number;
 
-  // Mode-specific state
-  // Timed
+  // Timed & Stopwatch
   timerSeconds: number;
   timerMaxSeconds: number;
   timerRunning: boolean;
+  elapsedSeconds: number;
 
   // Survival
   survivalLives: number;
@@ -105,6 +105,7 @@ export const useGameStore = create<GameState>()(
       timerSeconds: 60,
       timerMaxSeconds: 60,
       timerRunning: false,
+      elapsedSeconds: 0,
 
       // Survival
       survivalLives: 3,
@@ -238,12 +239,14 @@ export const useGameStore = create<GameState>()(
           }
         }
 
+        const isTimedChallenge = gameMode === 'timed' || (gameMode === 'chaos' && chaosModifier?.id === 'speed');
+
         set({
           guesses: newGuesses,
           currentGuess: '',
           status: newStatus,
           error: null,
-          timerRunning: newStatus === 'playing',
+          timerRunning: newStatus === 'playing' && isTimedChallenge,
         });
       },
 
@@ -292,6 +295,7 @@ export const useGameStore = create<GameState>()(
           timerSeconds: timerMax,
           timerMaxSeconds: timerMax,
           timerRunning: mode === 'timed' || (mode === 'chaos' && chaosMod?.id === 'speed'),
+          elapsedSeconds: 0,
           chaosModifier: chaosMod,
           customChallengeWord: options?.customTarget || null,
         });
@@ -334,24 +338,32 @@ export const useGameStore = create<GameState>()(
           timerSeconds: timerMax,
           timerMaxSeconds: timerMax,
           timerRunning: gameMode === 'timed' || (gameMode === 'chaos' && chaosMod?.id === 'speed'),
+          elapsedSeconds: 0,
           chaosModifier: chaosMod,
         });
       },
 
       tickTimer: () => {
-        const { timerSeconds, status, targetWord } = get();
+        const { timerSeconds, status, targetWord, gameMode, chaosModifier, elapsedSeconds } = get();
         if (status !== 'playing') return;
 
-        if (timerSeconds <= 1) {
-          set({
-            timerSeconds: 0,
-            timerRunning: false,
-            status: 'lost',
-            error: `Time's up! Word: ${targetWord}`,
-          });
-          usePlayerStore.getState().recordGameResult(false, get().guesses.length);
+        const isTimedChallenge = gameMode === 'timed' || (gameMode === 'chaos' && chaosModifier?.id === 'speed');
+
+        if (isTimedChallenge) {
+          if (timerSeconds <= 1) {
+            set({
+              timerSeconds: 0,
+              timerRunning: false,
+              status: 'lost',
+              error: `Time's up! Word: ${targetWord}`,
+            });
+            usePlayerStore.getState().recordGameResult(false, get().guesses.length);
+          } else {
+            set({ timerSeconds: timerSeconds - 1 });
+          }
         } else {
-          set({ timerSeconds: timerSeconds - 1 });
+          // Standard modes with timer enabled just count elapsed time and never end the game
+          set({ elapsedSeconds: (elapsedSeconds || 0) + 1 });
         }
       },
 
@@ -366,6 +378,7 @@ export const useGameStore = create<GameState>()(
           hints: [],
           hintsRemaining: 2,
           maxGuesses: 6,
+          elapsedSeconds: 0,
         });
       },
 
@@ -385,6 +398,7 @@ export const useGameStore = create<GameState>()(
           error: null,
           hints: [],
           hintsRemaining: 2,
+          elapsedSeconds: 0,
         });
       },
 
@@ -409,6 +423,7 @@ export const useGameStore = create<GameState>()(
           timerSeconds: timerMax,
           timerMaxSeconds: timerMax,
           timerRunning: chaosMod.id === 'speed',
+          elapsedSeconds: 0,
         });
       },
 
@@ -428,6 +443,7 @@ export const useGameStore = create<GameState>()(
           error: null,
           hints: [],
           hintsRemaining: 2,
+          elapsedSeconds: 0,
         });
       },
       

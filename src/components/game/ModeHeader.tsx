@@ -34,6 +34,7 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
     endlessStage, 
     endlessScore, 
     chaosModifier,
+    elapsedSeconds,
     wordLength,
     maxGuesses,
     resetGame,
@@ -43,8 +44,9 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
   const showTimerSetting = useSettingsStore(state => state.showTimer);
   const [showHelp, setShowHelp] = useState(false);
 
+  const isTimedChallenge = gameMode === 'timed' || (gameMode === 'chaos' && chaosModifier?.id === 'speed');
   const timerPercentage = Math.max(0, Math.min(100, (timerSeconds / timerMaxSeconds) * 100));
-  const isTimerUrgent = timerSeconds <= 15;
+  const isTimerUrgent = isTimedChallenge && timerSeconds <= 15;
 
   const modeDisplayName = 
     gameMode === 'classic' ? 'Classic' :
@@ -122,8 +124,8 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
 
       {/* Mode-Specific Interactive HUD */}
       
-      {/* 1. TIMED MODE OR SHOW TIMER HUD */}
-      {(gameMode === 'timed' || showTimerSetting) && (
+      {/* 1. TIMED MODE OR CHAOS SPEED COUNTDOWN HUD */}
+      {isTimedChallenge && (
         <div className="flex flex-col gap-1.5 bg-[#181c26] p-3 rounded-2xl border border-[#262b38]">
           <div className="flex justify-between items-center text-xs font-bold">
             <span className="flex items-center gap-1 text-[#8e95a5]">
@@ -145,6 +147,18 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
               style={{ width: `${timerPercentage}%` }}
             />
           </div>
+        </div>
+      )}
+
+      {/* CASUAL ELAPSED TIMER HUD (if user enabled "Show Timer" in casual modes) */}
+      {showTimerSetting && !isTimedChallenge && (
+        <div className="flex items-center justify-between bg-[#181c26] px-4 py-2 rounded-2xl border border-[#262b38] text-xs font-bold">
+          <span className="flex items-center gap-1.5 text-[#8e95a5]">
+            <Clock size={14} className="text-[#2ec47d]" /> Time Elapsed
+          </span>
+          <span className="text-sm font-black text-[#2ec47d] font-mono tabular-nums">
+            {Math.floor((elapsedSeconds || 0) / 60)}:{String((elapsedSeconds || 0) % 60).padStart(2, '0')}
+          </span>
         </div>
       )}
 

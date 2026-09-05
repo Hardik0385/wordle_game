@@ -99,9 +99,15 @@ export function Board() {
       {/* Floating Free Hint Capsule - positioned matching Image 3 */}
       <div className="w-full max-w-[20rem] flex justify-end mt-4">
         <button 
-          onClick={useHint}
+          type="button"
+          tabIndex={-1}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={(e) => {
+            (e.currentTarget as HTMLButtonElement)?.blur();
+            useHint();
+          }}
           disabled={hintsRemaining <= 0 || status !== 'playing'}
-          className="flex items-center gap-1.5 text-xs font-black bg-[#1a1f2b] hover:bg-[#242b3c] text-white border border-[#2b3346] px-4 py-2 rounded-full shadow-lg transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-1.5 text-xs font-black bg-[#1a1f2b] hover:bg-[#242b3c] text-white border border-[#2b3346] px-4 py-2 rounded-full shadow-lg transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed outline-none focus:outline-none"
         >
           <span className="text-yellow-400 text-sm">💡</span>
           <span>Hint</span>
