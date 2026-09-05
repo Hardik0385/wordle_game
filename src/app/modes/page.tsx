@@ -73,14 +73,18 @@ const MODES: { id: GameMode; name: string; description: string; icon: string; ta
 
 export default function ModesPage() {
   const router = useRouter();
-  const { setGameMode } = useGameStore();
+  const { setGameMode, gameMode, status, guesses, maxGuesses, savedGamesByMode } = useGameStore();
 
   const handleSelectMode = (modeId: GameMode) => {
     if (modeId === 'daily') {
       router.push('/daily');
     } else {
-      setGameMode(modeId);
-      router.push(`/play?mode=${modeId}`);
+      if (modeId === gameMode && status === 'playing') {
+        router.push(`/play?mode=${modeId}`);
+      } else {
+        setGameMode(modeId);
+        router.push(`/play?mode=${modeId}`);
+      }
     }
   };
 
@@ -95,28 +99,43 @@ export default function ModesPage() {
       </header>
 
       <div className="grid md:grid-cols-2 gap-3.5">
-        {MODES.map(mode => (
-          <button
-            key={mode.id}
-            onClick={() => handleSelectMode(mode.id)}
-            className={`group relative flex flex-col items-start text-left bg-[var(--surface)] p-6 rounded-3xl border ${mode.color} transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-lg`}
-          >
-            <div className="w-full flex items-center justify-between mb-4">
-              <span className="text-3xl group-hover:scale-110 transition-transform">{mode.icon}</span>
-              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/5 text-[var(--foreground-muted)]">
-                {mode.tag}
-              </span>
-            </div>
+        {MODES.map(mode => {
+          const isCurrentActive = mode.id === gameMode && status === 'playing' && guesses.length > 0;
+          const saved = savedGamesByMode?.[mode.id];
+          const hasSavedGame = isCurrentActive || (saved && saved.status === 'playing' && saved.guesses.length > 0);
+          const savedCount = isCurrentActive ? guesses.length : (saved?.guesses.length || 0);
+          const allowedGuesses = isCurrentActive ? maxGuesses : (saved?.maxGuesses || 6);
 
-            <h2 className="text-lg font-black text-[var(--foreground)] mb-1 flex items-center gap-2">
-              {mode.name}
-              <Play size={13} className="opacity-0 group-hover:opacity-100 transition-opacity fill-current text-[#2ec47d]" />
-            </h2>
-            <p className="text-xs text-[var(--foreground-muted)] leading-relaxed">
-              {mode.description}
-            </p>
-          </button>
-        ))}
+          return (
+            <button
+              key={mode.id}
+              onClick={() => handleSelectMode(mode.id)}
+              className={`group relative flex flex-col items-start text-left bg-[var(--surface)] p-6 rounded-3xl border ${mode.color} transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-lg`}
+            >
+              <div className="w-full flex items-center justify-between mb-4">
+                <span className="text-3xl group-hover:scale-110 transition-transform">{mode.icon}</span>
+                <div className="flex items-center gap-1.5">
+                  {hasSavedGame && (
+                    <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30">
+                      In Progress ({savedCount}/{allowedGuesses})
+                    </span>
+                  )}
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/5 text-[var(--foreground-muted)]">
+                    {mode.tag}
+                  </span>
+                </div>
+              </div>
+
+              <h2 className="text-lg font-black text-[var(--foreground)] mb-1 flex items-center gap-2">
+                {mode.name}
+                <Play size={13} className="opacity-0 group-hover:opacity-100 transition-opacity fill-current text-[#2ec47d]" />
+              </h2>
+              <p className="text-xs text-[var(--foreground-muted)] leading-relaxed">
+                {mode.description}
+              </p>
+            </button>
+          );
+        })}
       </div>
     </main>
   );

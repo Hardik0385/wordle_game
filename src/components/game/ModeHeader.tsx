@@ -68,49 +68,49 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
     gameMode === 'chaos' ? 'MODIFIERS ACTIVE' : 'USER RULES';
 
   return (
-    <div className="w-full max-w-lg mb-4 flex flex-col gap-3">
+    <div className="w-full max-w-lg mb-1 sm:mb-2.5 flex flex-col gap-1.5 sm:gap-2.5 shrink-0">
       {/* Clean Top Header */}
-      <div className="flex items-center justify-between py-1">
+      <div className="flex items-center justify-between py-0.5 sm:py-1">
         {/* Back button */}
         <Link
           href="/modes"
-          className="h-10 w-10 rounded-2xl bg-[var(--surface)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background)] transition-colors"
+          className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-[var(--surface)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background)] transition-colors"
         >
-          <ChevronLeft size={20} />
+          <ChevronLeft size={18} className="sm:w-5 sm:h-5" />
         </Link>
 
         {/* Center Mode Title & Subtitle */}
         <div className="flex flex-col items-center text-center">
-          <h1 className="text-lg font-black text-[var(--foreground)] tracking-wide">
+          <h1 className="text-base sm:text-lg font-black text-[var(--foreground)] tracking-wide leading-tight">
             {modeDisplayName}
           </h1>
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--foreground-muted)]">
+          <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest text-[var(--foreground-muted)]">
             {modeSubtitle}
           </span>
         </div>
 
         {/* Right Action Icons: Help & Stats */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1 sm:gap-1.5">
           <button
             type="button"
             onClick={() => setShowHelp(!showHelp)}
-            className="h-10 w-10 rounded-2xl bg-[var(--surface)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background)] transition-colors"
+            className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-[var(--surface)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background)] transition-colors"
           >
-            <HelpCircle size={18} />
+            <HelpCircle size={16} className="sm:w-[18px] sm:h-[18px]" />
           </button>
 
           <Link
             href="/stats"
-            className="h-10 w-10 rounded-2xl bg-[var(--surface)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background)] transition-colors"
+            className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-[var(--surface)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background)] transition-colors"
           >
-            <BarChart2 size={18} />
+            <BarChart2 size={16} className="sm:w-[18px] sm:h-[18px]" />
           </Link>
         </div>
       </div>
 
       {/* Help Drawer / Modal if opened */}
       {showHelp && (
-        <div className="bg-[var(--surface)] border border-[var(--surface-border)] p-4 rounded-3xl text-xs text-[var(--foreground-muted)] flex flex-col gap-2 shadow-xl animate-in fade-in">
+        <div className="bg-[var(--surface)] border border-[var(--surface-border)] p-3 sm:p-4 rounded-2xl sm:rounded-3xl text-xs text-[var(--foreground-muted)] flex flex-col gap-1.5 sm:gap-2 shadow-xl animate-in fade-in">
           <div className="font-bold text-[var(--foreground)] flex justify-between items-center">
             <span>{getTranslation(interfaceLanguage, 'how_to_play')}</span>
             <button onClick={() => setShowHelp(false)} className="text-[var(--foreground-muted)] hover:text-[var(--foreground)] font-black">✕</button>

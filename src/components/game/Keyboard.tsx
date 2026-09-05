@@ -84,7 +84,7 @@ export function Keyboard() {
   }, [handleKey]);
 
   return (
-    <div className="flex w-full flex-col gap-1.5 sm:gap-2 max-w-lg mx-auto select-none">
+    <div className="flex w-full flex-col gap-1 sm:gap-1.5 max-w-lg mx-auto select-none">
       {ROWS.map((row, i) => (
         <div key={i} className="flex justify-center gap-1 sm:gap-1.5 w-full">
           {row.map(key => {
@@ -102,9 +102,9 @@ export function Keyboard() {
                   handleKey(key);
                 }}
                 className={cn(
-                  "relative flex items-center justify-center rounded-xl font-extrabold uppercase transition-all h-12 sm:h-14 flex-1 max-w-[2.6rem] sm:max-w-[3.2rem] shadow-sm active:scale-95 outline-none focus:outline-none",
+                  "relative flex items-center justify-center rounded-lg sm:rounded-xl font-black uppercase transition-all h-[min(2.7rem,5.6vh)] sm:h-12 md:h-14 text-xs min-[360px]:text-sm sm:text-base flex-1 max-w-[2.6rem] sm:max-w-[3.2rem] shadow-sm active:scale-95 outline-none focus:outline-none",
                   {
-                    "max-w-[4rem] sm:max-w-[4.8rem] px-1 text-[11px] sm:text-xs tracking-wider": isSpecial,
+                    "max-w-[3.8rem] min-[360px]:max-w-[4.2rem] sm:max-w-[4.8rem] px-0.5 min-[360px]:px-1 text-[9px] min-[360px]:text-[10px] sm:text-xs tracking-tight sm:tracking-wider": isSpecial,
                     "bg-[var(--key-bg)] hover:brightness-110 text-[var(--key-text)]": !state,
                     "bg-[var(--tile-bg-absent)] text-[var(--tile-text-absent)] opacity-60": state === 'absent',
                     "bg-[#0284c7] text-white shadow-md": state === 'present' && colorblindMode,
@@ -114,7 +114,7 @@ export function Keyboard() {
                   }
                 )}
               >
-                {key === 'BACKSPACE' ? <Delete size={18} /> : key}
+                {key === 'BACKSPACE' ? <Delete size={16} className="sm:w-[18px] sm:h-[18px]" /> : key}
                 {colorblindMode && state === 'correct' && (
                   <span className="absolute top-0.5 right-1 text-[7px] font-black text-white/90 leading-none select-none">✓</span>
                 )}

@@ -67,8 +67,13 @@ export default function SettingsPage() {
   // 2. Word Length Handler
   const handleWordLengthChange = (length: number) => {
     setWordLength(length);
-    useGameStore.getState().resetGame(undefined, undefined, length);
-    toast.success(`Word length set to ${length} letters!`);
+    const gameState = useGameStore.getState();
+    if (gameState.status === 'playing' && gameState.guesses.length > 0) {
+      toast.success(`Word length set to ${length} letters! Will apply to your next game.`);
+    } else {
+      gameState.resetGame(undefined, undefined, length);
+      toast.success(`Word length set to ${length} letters!`);
+    }
   };
 
   // 3. Haptics Handler
@@ -432,8 +437,13 @@ export default function SettingsPage() {
               onChange={(e) => {
                 const lang = e.target.value;
                 setGameLanguage(lang);
-                useGameStore.getState().resetGame();
-                toast.success(`Game language set to ${lang}`);
+                const gameState = useGameStore.getState();
+                if (gameState.status === 'playing' && gameState.guesses.length > 0) {
+                  toast.success(`Game language set to ${lang}! Will apply to your next game.`);
+                } else {
+                  gameState.resetGame();
+                  toast.success(`Game language set to ${lang}`);
+                }
               }}
               className="bg-[var(--background)] text-[var(--foreground)] text-xs font-bold px-3 py-2 rounded-xl border border-[var(--surface-border)] focus:outline-none cursor-pointer"
             >

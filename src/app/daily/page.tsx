@@ -8,35 +8,30 @@ import { useGameStore } from '@/store/game-store';
 import { getDailyWord } from '@/engine/word-validator';
 
 export default function DailyPage() {
-  const { resetGame, targetWord } = useGameStore();
+  const { setGameMode, gameMode } = useGameStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Generate today's date string, e.g. "2026-09-06"
-    const today = new Date().toISOString().split('T')[0];
-    const dailyWord = getDailyWord(5, today);
-
-    // If the current target word is not the daily word, reset the game for the daily challenge
-    if (targetWord !== dailyWord.toUpperCase()) {
-      resetGame(dailyWord);
+    if (gameMode !== 'daily') {
+      setGameMode('daily');
     }
     setMounted(true);
-  }, [resetGame, targetWord]);
+  }, [setGameMode, gameMode]);
 
   if (!mounted) return <div className="p-8">Loading daily challenge...</div>;
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-4 sm:p-8">
+    <main className="flex h-[100dvh] max-h-[100dvh] flex-col items-center justify-between p-2 sm:p-4 md:p-6 pb-[4.25rem] md:pb-4 overflow-hidden select-none">
       <ResultModal />
-      <header className="w-full max-w-lg mb-8 flex justify-between items-center py-4 border-b dark:border-gray-800">
-        <h1 className="text-xl font-extrabold tracking-widest text-center flex-1">DAILY CHALLENGE</h1>
+      <header className="w-full max-w-lg mb-1 sm:mb-2.5 flex justify-between items-center py-1 sm:py-2 border-b dark:border-gray-800 shrink-0">
+        <h1 className="text-base sm:text-lg font-extrabold tracking-widest text-center flex-1">DAILY CHALLENGE</h1>
       </header>
       
-      <div className="flex-1 flex flex-col justify-center w-full max-w-lg mb-8">
+      <div className="flex-1 flex flex-col justify-center items-center w-full max-w-lg min-h-0">
         <Board />
       </div>
       
-      <div className="w-full max-w-lg">
+      <div className="w-full max-w-lg shrink-0">
         <Keyboard />
       </div>
     </main>

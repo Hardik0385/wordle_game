@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useGameStore } from './game-store';
+import { usePlayerStore } from './player-store';
 
 describe('game-store timer and guess mechanics', () => {
   beforeEach(() => {
@@ -82,5 +83,47 @@ describe('game-store timer and guess mechanics', () => {
     expect(state3.hintsRemaining).toBe(0);
     expect(state3.hints).toHaveLength(2);
     expect(state3.error).toContain('No hints left');
+  });
+
+  it('preserves in-progress classic game when switching to survival and switching back', () => {
+    const store = useGameStore.getState();
+    store.resetGame('CRANE');
+    store.addLetter('S');
+    store.addLetter('L');
+    store.addLetter('ALate'.slice(2, 3)); // 'A'
+    store.addLetter('T');
+    store.addLetter('E');
+    store.submitGuess(); // 'SLATE' submitted
+
+    expect(useGameStore.getState().guesses).toEqual(['SLATE']);
+    expect(useGameStore.getState().targetWord).toBe('CRANE');
+
+    // Switch to survival mode
+    useGameStore.getState().setGameMode('survival');
+    expect(useGameStore.getState().gameMode).toBe('survival');
+    expect(useGameStore.getState().guesses).toEqual([]);
+
+    // Switch back to classic mode
+    useGameStore.getState().setGameMode('classic');
+    expect(useGameStore.getState().gameMode).toBe('classic');
+    expect(useGameStore.getState().targetWord).toBe('CRANE');
+    expect(useGameStore.getState().guesses).toEqual(['SLATE']);
+  });
+
+  it('forfeits an active timed game when switching modes and counts it in player stats', () => {
+    const initialGames = usePlayerStore.getState().stats.gamesPlayed;
+
+    // Start timed mode and simulate timer ticking down / guess
+    useGameStore.getState().setGameMode('timed');
+    useGameStore.getState().tickTimer(); // timerSeconds becomes 59
+
+    expect(useGameStore.getState().timerSeconds).toBe(59);
+
+    // Switch away from timed mode to classic
+    useGameStore.getState().setGameMode('classic');
+
+    // Timed game should have been forfeited and counted in player stats
+    const afterGames = usePlayerStore.getState().stats.gamesPlayed;
+    expect(afterGames).toBe(initialGames + 1);
   });
 });

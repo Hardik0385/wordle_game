@@ -19,7 +19,8 @@ function PlayContent() {
     status, 
     timerRunning, 
     tickTimer, 
-    resetGame 
+    resetGame,
+    forfeitTimedGameIfActive
   } = useGameStore();
 
   const [mounted, setMounted] = useState(false);
@@ -49,12 +50,26 @@ function PlayContent() {
       }
     } else if (modeParam && modeParam !== gameMode) {
       setGameMode(modeParam);
-    } else if (status !== 'playing') {
-      resetGame();
     }
 
     setMounted(true);
-  }, [searchParams]);
+  }, [searchParams, gameMode, setGameMode]);
+
+  // Forfeit active timed challenge if user navigates away or hides page
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        forfeitTimedGameIfActive();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      forfeitTimedGameIfActive();
+    };
+  }, [forfeitTimedGameIfActive]);
 
   const showTimerSetting = useSettingsStore(state => state.showTimer);
 
@@ -78,7 +93,7 @@ function PlayContent() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-4 sm:p-8">
+    <main className="flex h-[100dvh] max-h-[100dvh] flex-col items-center justify-between p-2 sm:p-4 md:p-6 pb-[4.25rem] md:pb-4 overflow-hidden select-none">
       <ResultModal />
       <CustomGameModal 
         isOpen={customModalOpen} 
@@ -87,11 +102,11 @@ function PlayContent() {
 
       <ModeHeader onOpenCustomModal={() => setCustomModalOpen(true)} />
       
-      <div className="flex-1 flex flex-col justify-center w-full max-w-lg mb-6">
+      <div className="flex-1 flex flex-col justify-center items-center w-full max-w-lg min-h-0">
         <Board />
       </div>
       
-      <div className="w-full max-w-lg">
+      <div className="w-full max-w-lg shrink-0">
         <Keyboard />
       </div>
     </main>

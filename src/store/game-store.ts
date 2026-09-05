@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { evaluateGuess, EvaluatedLetter } from '../engine/guess-evaluator';
-import { isValidWord, getRandomWord, validateHardMode } from '../engine/word-validator';
+import { isValidWord, getRandomWord, validateHardMode, getDailyWord } from '../engine/word-validator';
 import { usePlayerStore } from './player-store';
 import { useSettingsStore } from './settings-store';
 import { sounds } from '../lib/sound';
@@ -23,6 +23,30 @@ export interface ChaosModifier {
   letter?: string;
 }
 
+export interface ModeSavedState {
+  targetWord: string;
+  wordLength: number;
+  guesses: string[];
+  maxGuesses: number;
+  currentGuess: string;
+  status: GameStatus;
+  hints: PositionHint[];
+  hintsRemaining: number;
+  timerSeconds: number;
+  timerMaxSeconds: number;
+  elapsedSeconds: number;
+  survivalLives: number;
+  survivalMaxLives: number;
+  survivalStreak: number;
+  survivalBest: number;
+  endlessStage: number;
+  endlessScore: number;
+  chaosModifier: ChaosModifier | null;
+  customChallengeWord: string | null;
+  dailyDate?: string;
+  savedAt: number;
+}
+
 const CHAOS_MODIFIERS: ChaosModifier[] = [
   { id: 'fog', name: 'Fog of War', description: 'Tile colors fade away after 3 seconds! Test your memory.', icon: '🌫️' },
   { id: 'speed', name: 'Speed Rush', description: 'Only 35 seconds to solve before explosion!', icon: '⚡' },
@@ -42,6 +66,32 @@ function getRandomChaosModifier(): ChaosModifier {
   return { ...mod };
 }
 
+function extractModeState(state: GameState): ModeSavedState {
+  return {
+    targetWord: state.targetWord,
+    wordLength: state.wordLength,
+    guesses: state.guesses,
+    maxGuesses: state.maxGuesses,
+    currentGuess: state.currentGuess,
+    status: state.status,
+    hints: state.hints,
+    hintsRemaining: state.hintsRemaining,
+    timerSeconds: state.timerSeconds,
+    timerMaxSeconds: state.timerMaxSeconds,
+    elapsedSeconds: state.elapsedSeconds,
+    survivalLives: state.survivalLives,
+    survivalMaxLives: state.survivalMaxLives,
+    survivalStreak: state.survivalStreak,
+    survivalBest: state.survivalBest,
+    endlessStage: state.endlessStage,
+    endlessScore: state.endlessScore,
+    chaosModifier: state.chaosModifier,
+    customChallengeWord: state.customChallengeWord,
+    dailyDate: new Date().toISOString().split('T')[0],
+    savedAt: Date.now(),
+  };
+}
+
 interface GameState {
   gameMode: GameMode;
   targetWord: string;
@@ -53,6 +103,7 @@ interface GameState {
   error: string | null;
   hints: PositionHint[];
   hintsRemaining: number;
+  savedGamesByMode: Partial<Record<GameMode, ModeSavedState>>;
 
   // Timed & Stopwatch
   timerSeconds: number;
@@ -87,6 +138,7 @@ interface GameState {
   clearError: () => void;
   useHint: () => void;
   tickTimer: () => void;
+  forfeitTimedGameIfActive: () => void;
   nextSurvivalWord: () => void;
   nextEndlessStage: () => void;
   nextChaosWord: () => void;
@@ -106,6 +158,7 @@ export const useGameStore = create<GameState>()(
       error: null,
       hints: [],
       hintsRemaining: 2,
+      savedGamesByMode: {},
 
       // Timed
       timerSeconds: 60,
@@ -248,16 +301,105 @@ export const useGameStore = create<GameState>()(
 
         const isTimedChallenge = gameMode === 'timed' || (gameMode === 'chaos' && chaosModifier?.id === 'speed');
 
+        const updatedSavedGames = { ...get().savedGamesByMode };
+        updatedSavedGames[gameMode] = {
+          ...extractModeState(get()),
+          guesses: newGuesses,
+          currentGuess: '',
+          status: newStatus,
+        };
+
         set({
           guesses: newGuesses,
           currentGuess: '',
           status: newStatus,
           error: null,
           timerRunning: newStatus === 'playing' && isTimedChallenge,
+          savedGamesByMode: updatedSavedGames,
         });
       },
 
+      forfeitTimedGameIfActive: () => {
+        const current = get();
+        const isTimedChallenge = current.gameMode === 'timed' || (current.gameMode === 'chaos' && current.chaosModifier?.id === 'speed');
+        const hasStarted = current.guesses.length > 0 || current.timerSeconds < current.timerMaxSeconds;
+
+        if (isTimedChallenge && current.status === 'playing' && hasStarted) {
+          const updatedSaved = { ...current.savedGamesByMode };
+          delete updatedSaved[current.gameMode];
+
+          set({
+            status: 'lost',
+            timerRunning: false,
+            error: "Timed challenge ended because you switched away.",
+            savedGamesByMode: updatedSaved,
+          });
+
+          usePlayerStore.getState().recordGameResult(false, current.guesses.length);
+        }
+      },
+
       setGameMode: (mode, options) => {
+        const current = get();
+        const isCurrentTimed = current.gameMode === 'timed' || (current.gameMode === 'chaos' && current.chaosModifier?.id === 'speed');
+        const currentStarted = current.guesses.length > 0 || current.timerSeconds < current.timerMaxSeconds;
+        const updatedSaved = { ...current.savedGamesByMode };
+
+        // 1. If departing from an active timed challenge that has started, forfeit it!
+        if (isCurrentTimed && current.status === 'playing' && currentStarted && mode !== current.gameMode) {
+          delete updatedSaved[current.gameMode];
+          usePlayerStore.getState().recordGameResult(false, current.guesses.length);
+        } else if (current.status === 'playing') {
+          // Preserve departing non-timed game
+          updatedSaved[current.gameMode] = extractModeState(current);
+        }
+
+        // If selecting the exact same mode and no custom options provided, and game is active, just keep it!
+        if (mode === current.gameMode && !options && current.status === 'playing') {
+          set({ savedGamesByMode: updatedSaved });
+          return;
+        }
+
+        // 2. Check if the target mode has an in-progress game to restore
+        const today = new Date().toISOString().split('T')[0];
+        const savedForNewMode = updatedSaved[mode];
+        const canRestore = savedForNewMode && 
+          savedForNewMode.status === 'playing' && 
+          !options?.customTarget &&
+          (mode !== 'daily' || savedForNewMode.dailyDate === today);
+
+        if (canRestore) {
+          set({
+            gameMode: mode,
+            targetWord: savedForNewMode.targetWord,
+            wordLength: savedForNewMode.wordLength,
+            guesses: savedForNewMode.guesses,
+            maxGuesses: savedForNewMode.maxGuesses,
+            currentGuess: savedForNewMode.currentGuess,
+            status: savedForNewMode.status,
+            error: null,
+            hints: savedForNewMode.hints,
+            hintsRemaining: savedForNewMode.hintsRemaining,
+            timerSeconds: savedForNewMode.timerSeconds,
+            timerMaxSeconds: savedForNewMode.timerMaxSeconds,
+            timerRunning: mode === 'timed' || (mode === 'chaos' && savedForNewMode.chaosModifier?.id === 'speed'),
+            elapsedSeconds: savedForNewMode.elapsedSeconds,
+            survivalLives: savedForNewMode.survivalLives,
+            survivalMaxLives: savedForNewMode.survivalMaxLives,
+            survivalStreak: savedForNewMode.survivalStreak,
+            survivalBest: savedForNewMode.survivalBest,
+            endlessStage: savedForNewMode.endlessStage,
+            endlessScore: savedForNewMode.endlessScore,
+            chaosModifier: savedForNewMode.chaosModifier,
+            customChallengeWord: savedForNewMode.customChallengeWord,
+            savedGamesByMode: updatedSaved,
+          });
+          return;
+        }
+
+        // 3. Otherwise initialize a fresh game for this mode
+        delete updatedSaved[mode];
+
         let length = options?.wordLength || 5;
         let guesses = options?.maxGuesses || 6;
         let timerMax = 60;
@@ -266,13 +408,10 @@ export const useGameStore = create<GameState>()(
         if (mode === 'timed') {
           timerMax = 60;
         } else if (mode === 'survival') {
-          // Keep current survival run if in progress, else reset
-          const current = get();
           if (current.survivalLives <= 0) {
             set({ survivalLives: 3, survivalStreak: 0 });
           }
         } else if (mode === 'endless') {
-          const current = get();
           const stage = current.endlessStage || 1;
           const config = getEndlessConfig(stage);
           length = config.length;
@@ -287,7 +426,14 @@ export const useGameStore = create<GameState>()(
         }
 
         const currentLang = useSettingsStore.getState().gameLanguage;
-        const target = options?.customTarget ? options.customTarget.toUpperCase() : getRandomWord(length, currentLang);
+        let target = '';
+        if (options?.customTarget) {
+          target = options.customTarget.toUpperCase();
+        } else if (mode === 'daily') {
+          target = getDailyWord(5, today).toUpperCase();
+        } else {
+          target = getRandomWord(length, currentLang);
+        }
 
         set({
           gameMode: mode,
@@ -306,11 +452,15 @@ export const useGameStore = create<GameState>()(
           elapsedSeconds: 0,
           chaosModifier: chaosMod,
           customChallengeWord: options?.customTarget || null,
+          savedGamesByMode: updatedSaved,
         });
       },
 
       resetGame: (newTarget, customMaxGuesses, customWordLength) => {
-        const { gameMode, wordLength, maxGuesses, endlessStage } = get();
+        const { gameMode, wordLength, maxGuesses, endlessStage, savedGamesByMode } = get();
+        const updatedSaved = { ...savedGamesByMode };
+        delete updatedSaved[gameMode];
+
         let targetLen = customWordLength || wordLength;
         let allowedGuesses = customMaxGuesses || maxGuesses;
         let timerMax = 60;
@@ -325,14 +475,21 @@ export const useGameStore = create<GameState>()(
           if (chaosMod.id === 'speed') timerMax = 35;
           if (chaosMod.id === 'sudden_death') allowedGuesses = 4;
         } else if (gameMode === 'survival') {
-          // If all lives were lost, reset to 3 lives
           if (get().survivalLives <= 0) {
             set({ survivalLives: 3, survivalStreak: 0 });
           }
         }
 
         const currentLang = useSettingsStore.getState().gameLanguage;
-        const target = newTarget ? newTarget.toUpperCase() : getRandomWord(targetLen, currentLang);
+        let target = '';
+        if (newTarget) {
+          target = newTarget.toUpperCase();
+        } else if (gameMode === 'daily') {
+          const today = new Date().toISOString().split('T')[0];
+          target = getDailyWord(5, today).toUpperCase();
+        } else {
+          target = getRandomWord(targetLen, currentLang);
+        }
 
         set({
           targetWord: target,
@@ -349,6 +506,7 @@ export const useGameStore = create<GameState>()(
           timerRunning: gameMode === 'timed' || (gameMode === 'chaos' && chaosMod?.id === 'speed'),
           elapsedSeconds: 0,
           chaosModifier: chaosMod,
+          savedGamesByMode: updatedSaved,
         });
       },
 
@@ -515,10 +673,22 @@ export const useGameStore = create<GameState>()(
           letter: hintLetter,
         };
 
+        const updatedHints = [...validHints, newHint];
+        const currentMode = get().gameMode;
+        const updatedSavedGames = { ...get().savedGamesByMode };
+        if (updatedSavedGames[currentMode]) {
+          updatedSavedGames[currentMode] = {
+            ...updatedSavedGames[currentMode]!,
+            hints: updatedHints,
+            hintsRemaining: remaining,
+          };
+        }
+
         set({ 
-          hints: [...validHints, newHint], 
+          hints: updatedHints, 
           hintsRemaining: remaining,
-          error: formatHintMessage(lang, chosenIndex + 1, hintLetter, remaining)
+          error: formatHintMessage(lang, chosenIndex + 1, hintLetter, remaining),
+          savedGamesByMode: updatedSavedGames,
         });
       }
     }),
