@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useGameStore } from '@/store/game-store';
 import { isValidWord } from '@/engine/word-validator';
-import { X, Sparkles, Share2, Play } from 'lucide-react';
+import { X, Share2, Play } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 interface CustomGameModalProps {
@@ -63,16 +63,16 @@ export function CustomGameModal({ isOpen, onClose }: CustomGameModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 w-full max-w-md rounded-3xl p-6 shadow-2xl flex flex-col gap-6 animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between border-b dark:border-gray-800 pb-3">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+      <div className="bg-[#181c26] border border-[#262b39] w-full max-w-md rounded-3xl p-6 shadow-2xl flex flex-col gap-5 animate-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between border-b border-[#262b39] pb-3">
           <div className="flex items-center gap-2">
             <span className="text-2xl">⚙️</span>
-            <h2 className="text-xl font-extrabold">Custom Game Setup</h2>
+            <h2 className="text-lg font-black text-white">Custom Game Setup</h2>
           </div>
           <button 
             onClick={onClose}
-            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500"
+            className="p-1 rounded-full hover:bg-[#222735] text-[#8e95a5] hover:text-white"
           >
             <X size={20} />
           </button>
@@ -80,7 +80,7 @@ export function CustomGameModal({ isOpen, onClose }: CustomGameModalProps) {
 
         {/* Word Length Selector */}
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-extrabold uppercase text-gray-500 tracking-wider">
+          <label className="text-[11px] font-black uppercase text-[#8e95a5] tracking-wider">
             Word Length
           </label>
           <div className="grid grid-cols-3 gap-2">
@@ -93,10 +93,10 @@ export function CustomGameModal({ isOpen, onClose }: CustomGameModalProps) {
                   setSecretWord('');
                   setSecretError(null);
                 }}
-                className={`py-3 rounded-2xl font-bold transition-all ${
+                className={`py-2.5 rounded-2xl font-bold text-xs transition-all ${
                   length === l
-                    ? 'bg-black text-white dark:bg-white dark:text-black shadow-md scale-[1.02]'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    ? 'bg-[#2ec47d] text-black shadow-md scale-[1.02]'
+                    : 'bg-[#222735] text-gray-300 hover:bg-[#2a3040] border border-[#2c3243]'
                 }`}
               >
                 {l} Letters
@@ -107,7 +107,7 @@ export function CustomGameModal({ isOpen, onClose }: CustomGameModalProps) {
 
         {/* Max Guesses Selector */}
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-extrabold uppercase text-gray-500 tracking-wider">
+          <label className="text-[11px] font-black uppercase text-[#8e95a5] tracking-wider">
             Max Attempts
           </label>
           <div className="grid grid-cols-5 gap-2">
@@ -116,10 +116,10 @@ export function CustomGameModal({ isOpen, onClose }: CustomGameModalProps) {
                 key={g}
                 type="button"
                 onClick={() => setMaxGuesses(g)}
-                className={`py-2.5 rounded-2xl font-bold transition-all ${
+                className={`py-2 rounded-2xl font-bold text-xs transition-all ${
                   maxGuesses === g
-                    ? 'bg-black text-white dark:bg-white dark:text-black shadow-md scale-[1.02]'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    ? 'bg-[#2ec47d] text-black shadow-md scale-[1.02]'
+                    : 'bg-[#222735] text-gray-300 hover:bg-[#2a3040] border border-[#2c3243]'
                 }`}
               >
                 {g}
@@ -130,9 +130,9 @@ export function CustomGameModal({ isOpen, onClose }: CustomGameModalProps) {
 
         {/* Challenge a Friend with Secret Word */}
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-extrabold uppercase text-gray-500 tracking-wider flex items-center justify-between">
+          <label className="text-[11px] font-black uppercase text-[#8e95a5] tracking-wider flex items-center justify-between">
             <span>Secret Word (Optional)</span>
-            <span className="text-[10px] text-gray-400 font-normal">Leave blank for random</span>
+            <span className="text-[10px] text-gray-500 font-normal">Leave blank for random</span>
           </label>
           <input
             type="text"
@@ -143,28 +143,28 @@ export function CustomGameModal({ isOpen, onClose }: CustomGameModalProps) {
               setSecretWord(e.target.value.toUpperCase());
               setSecretError(null);
             }}
-            className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 rounded-2xl font-bold text-center tracking-widest uppercase border focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700"
+            className="w-full px-4 py-2.5 bg-[#12151c] rounded-2xl font-black text-center tracking-widest uppercase border border-[#2c3243] text-white focus:outline-none focus:border-[#2ec47d] text-sm"
           />
           {secretError && (
-            <span className="text-xs text-red-500 font-bold">{secretError}</span>
+            <span className="text-xs text-red-400 font-bold">{secretError}</span>
           )}
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col gap-2 mt-2">
+        <div className="flex flex-col gap-2 mt-1">
           <button
             onClick={handleStartGame}
-            className="w-full py-4 rounded-2xl bg-black text-white dark:bg-white dark:text-black font-extrabold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+            className="w-full py-3.5 rounded-2xl bg-[#2ec47d] hover:bg-[#28b371] text-black font-black text-sm flex items-center justify-center gap-2 transition-colors shadow-lg shadow-[#2ec47d]/20"
           >
-            <Play size={18} fill="currentColor" /> Start Custom Game
+            <Play size={16} fill="currentColor" /> Start Custom Game
           </button>
 
           {secretWord.length === length && (
             <button
               onClick={handleCopyChallenge}
-              className="w-full py-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-bold flex items-center justify-center gap-2 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors text-sm"
+              className="w-full py-2.5 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-blue-400 font-bold flex items-center justify-center gap-2 hover:bg-blue-500/20 transition-colors text-xs"
             >
-              <Share2 size={16} /> Copy Challenge Link for Friends
+              <Share2 size={14} /> Copy Challenge Link for Friends
             </button>
           )}
         </div>

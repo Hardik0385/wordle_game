@@ -8,46 +8,155 @@
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  
-  --tile-bg-empty: transparent;
-  --tile-border-empty: #d1d5db;
-  --tile-bg-absent: #e5e7eb;
-  --tile-border-absent: #d1d5db;
-  --tile-bg-present: #eab308;
-  --tile-bg-correct: #22c55e;
-  
-  --key-bg: #e5e7eb;
-  --key-text: #000000;
-}
-
-.dark {
-  --background: #111827; /* gray-900 */
+  /* Soft, luxurious dark slate (NOT pitch harsh black, matching screenshots) */
+  --background: #12151c;
+  --surface: #191d27;
+  --surface-border: #262b38;
   --foreground: #ffffff;
+  --foreground-muted: #8e95a5;
   
-  --tile-bg-empty: transparent;
-  --tile-border-empty: #374151; /* gray-700 */
-  --tile-bg-absent: #1f2937; /* gray-800 */
-  --tile-border-absent: #374151;
+  --tile-bg-empty: #161922;
+  --tile-border-empty: #282e3d;
+  --tile-bg-absent: #222735;
+  --tile-border-absent: #2c3243;
+  --tile-text-absent: #9ca3af;
   
-  --key-bg: #374151;
+  --tile-bg-correct: #2ec47d;
+  --tile-text-correct: #ffffff;
+  --tile-bg-present: #d39e33;
+  --tile-text-present: #ffffff;
+  
+  --key-bg: #262b3a;
   --key-text: #ffffff;
+  --key-bg-hover: #33394c;
+
+  --tile-radius: 1rem;
 }
 
-/* We will add more themes later via data-theme attribute */
-[data-theme='midnight'] {
-  --background: #0f172a; /* slate-900 */
-  --foreground: #f8fafc;
-  --tile-bg-absent: #1e293b;
-  --tile-bg-present: #8b5cf6; /* violet-500 instead of yellow */
-  --tile-bg-correct: #0ea5e9; /* sky-500 instead of green */
+/* Light Mode Overrides */
+[data-appearance='light'] {
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --surface-border: #e2e8f0;
+  --foreground: #0f172a;
+  --foreground-muted: #64748b;
+  
+  --tile-bg-empty: #ffffff;
+  --tile-border-empty: #cbd5e1;
+  --tile-bg-absent: #e2e8f0;
+  --tile-border-absent: #cbd5e1;
+  --tile-text-absent: #475569;
+  
+  --key-bg: #e2e8f0;
+  --key-text: #0f172a;
+  --key-bg-hover: #cbd5e1;
+}
+
+/* Color Themes */
+/* 1. Forest (Default screenshot theme) */
+[data-theme='forest'] {
+  --tile-bg-correct: #2ec47d;
+  --tile-text-correct: #ffffff;
+  --tile-bg-present: #d39e33;
+  --tile-text-present: #ffffff;
+}
+
+/* 2. Aurora */
+[data-theme='aurora'] {
+  --tile-bg-correct: #8b5cf6;
+  --tile-text-correct: #ffffff;
+  --tile-bg-present: #f97316;
+  --tile-text-present: #ffffff;
+}
+
+/* 3. Sunset */
+[data-theme='sunset'] {
+  --tile-bg-correct: #ec4899;
+  --tile-text-correct: #ffffff;
+  --tile-bg-present: #fb923c;
+  --tile-text-present: #ffffff;
+}
+
+/* 4. Ocean */
+[data-theme='ocean'] {
+  --tile-bg-correct: #06b6d4;
+  --tile-text-correct: #ffffff;
+  --tile-bg-present: #3b82f6;
+  --tile-text-present: #ffffff;
+}
+
+/* 5. Candy */
+[data-theme='candy'] {
+  --tile-bg-correct: #d946ef;
+  --tile-text-correct: #ffffff;
+  --tile-bg-present: #14b8a6;
+  --tile-text-present: #ffffff;
+}
+
+/* 6. Mono */
+[data-theme='mono'] {
+  --tile-bg-correct: #f8fafc;
+  --tile-text-correct: #0f172a;
+  --tile-bg-present: #64748b;
+  --tile-text-present: #ffffff;
+}
+
+/* 7. Classic */
+[data-theme='classic'] {
+  --tile-bg-correct: #22c55e;
+  --tile-text-correct: #ffffff;
+  --tile-bg-present: #eab308;
+  --tile-text-present: #ffffff;
+}
+
+/* Tile Shapes */
+[data-shape='rounded'] {
+  --tile-radius: 1rem;
+}
+[data-shape='square'] {
+  --tile-radius: 0.375rem;
+}
+[data-shape='circle'] {
+  --tile-radius: 9999px;
+}
+
+/* Font Families */
+.font-fredoka {
+  font-family: 'Fredoka', cursive, sans-serif !important;
+}
+.font-righteous {
+  font-family: 'Righteous', cursive, sans-serif !important;
+}
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+.font-heavy {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-weight: 800;
+}
+
+/* Colorblind Mode high-contrast overrides */
+[data-colorblind='true'] {
+  --tile-bg-correct: #f97316 !important;
+  --tile-text-correct: #ffffff !important;
+  --tile-bg-present: #0284c7 !important;
+  --tile-text-present: #ffffff !important;
+}
+
+/* Animation Speed Overrides */
+[data-animation='fast'] * {
+  animation-duration: 0.15s !important;
+  transition-duration: 0.15s !important;
+}
+[data-animation='off'] * {
+  animation: none !important;
+  transition: none !important;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 

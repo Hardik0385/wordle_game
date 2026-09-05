@@ -6,6 +6,9 @@ import { evaluateGuess, LetterState } from '@/engine/guess-evaluator';
 import { cn } from '@/lib/utils';
 import { Delete } from 'lucide-react';
 
+import { useSettingsStore } from '@/store/settings-store';
+import { sounds } from '@/lib/sound';
+
 const ROWS = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
   ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
@@ -34,6 +37,14 @@ export function Keyboard() {
   });
 
   const handleKey = useCallback((key: string) => {
+    const { soundEnabled, hapticsEnabled } = useSettingsStore.getState();
+    if (soundEnabled) {
+      sounds.playKeyClick();
+    }
+    if (hapticsEnabled && typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(12);
+    }
+
     if (key === 'ENTER') {
       submitGuess();
     } else if (key === 'BACKSPACE') {
@@ -61,9 +72,9 @@ export function Keyboard() {
   }, [handleKey]);
 
   return (
-    <div className="flex w-full flex-col gap-2 max-w-lg mx-auto">
+    <div className="flex w-full flex-col gap-1.5 sm:gap-2 max-w-lg mx-auto select-none">
       {ROWS.map((row, i) => (
-        <div key={i} className="flex justify-center gap-1 sm:gap-2 w-full">
+        <div key={i} className="flex justify-center gap-1 sm:gap-1.5 w-full">
           {row.map(key => {
             const state = letterStates.get(key);
             const isSpecial = key === 'ENTER' || key === 'BACKSPACE';
@@ -73,18 +84,17 @@ export function Keyboard() {
                 key={key}
                 onClick={() => handleKey(key)}
                 className={cn(
-                  "flex items-center justify-center rounded font-bold uppercase transition-colors h-14 sm:h-16 flex-1 max-w-[2.5rem] sm:max-w-[3rem]",
+                  "flex items-center justify-center rounded-xl font-extrabold uppercase transition-all h-12 sm:h-14 flex-1 max-w-[2.6rem] sm:max-w-[3.2rem] shadow-sm active:scale-95",
                   {
-                    "max-w-[4rem] sm:max-w-[5rem] px-2 text-xs sm:text-sm": isSpecial,
-                    "bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-black dark:text-white": !state && !isSpecial,
-                    "bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-black dark:text-white": !state && isSpecial,
-                    "bg-gray-400 dark:bg-gray-800 text-white": state === 'absent',
-                    "bg-yellow-500 text-white": state === 'present',
-                    "bg-green-500 text-white": state === 'correct',
+                    "max-w-[4rem] sm:max-w-[4.8rem] px-1 text-[11px] sm:text-xs tracking-wider": isSpecial,
+                    "bg-[var(--key-bg)] hover:brightness-110 text-[var(--key-text)]": !state,
+                    "bg-[var(--tile-bg-absent)] text-[var(--tile-text-absent)] opacity-60": state === 'absent',
+                    "bg-[var(--tile-bg-present)] text-[var(--tile-text-present)] shadow-md": state === 'present',
+                    "bg-[var(--tile-bg-correct)] text-[var(--tile-text-correct)] shadow-md": state === 'correct',
                   }
                 )}
               >
-                {key === 'BACKSPACE' ? <Delete size={20} /> : key}
+                {key === 'BACKSPACE' ? <Delete size={18} /> : key}
               </button>
             );
           })}

@@ -8,6 +8,7 @@ import { ResultModal } from '@/components/game/ResultModal';
 import { ModeHeader } from '@/components/game/ModeHeader';
 import { CustomGameModal } from '@/components/game/CustomGameModal';
 import { useGameStore, GameMode } from '@/store/game-store';
+import { useSettingsStore } from '@/store/settings-store';
 import { toast } from 'react-hot-toast';
 
 function PlayContent() {
@@ -55,16 +56,18 @@ function PlayContent() {
     setMounted(true);
   }, [searchParams]);
 
-  // Timed Mode and Chaos Speed ticker effect
+  const showTimerSetting = useSettingsStore(state => state.showTimer);
+
+  // Timed Mode, Chaos Speed, or Show Timer setting ticker effect
   useEffect(() => {
-    if (!timerRunning || status !== 'playing') return;
+    if ((!timerRunning && !showTimerSetting) || status !== 'playing') return;
 
     const interval = setInterval(() => {
       tickTimer();
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timerRunning, status, tickTimer]);
+  }, [timerRunning, showTimerSetting, status, tickTimer]);
 
   if (!mounted) {
     return (

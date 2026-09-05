@@ -1,3 +1,5 @@
+'use client';
+
 import { useGameStore } from '@/store/game-store';
 import { usePlayerStore } from '@/store/player-store';
 import { evaluateGuess } from '@/engine/guess-evaluator';
@@ -14,7 +16,6 @@ export function ResultModal() {
     gameMode, 
     survivalLives, 
     survivalStreak, 
-    survivalBest, 
     nextSurvivalWord, 
     endlessStage, 
     endlessScore, 
@@ -36,14 +37,14 @@ export function ResultModal() {
   const xpGained = won ? 100 + ((maxGuesses - guesses.length) * 20) : 10;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center animate-in zoom-in-95 duration-200 border border-gray-100 dark:border-gray-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+      <div className="bg-[#181c26] w-full max-w-sm rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center animate-in zoom-in-95 duration-200 border border-[#262b39]">
         
         <div className="text-5xl mb-3">
           {won ? '🎉' : isSurvival && survivalLives > 0 ? '💔' : '💀'}
         </div>
 
-        <h2 className="text-2xl font-black mb-1">
+        <h2 className="text-2xl font-black text-white mb-1">
           {won 
             ? isEndless 
               ? `Stage ${endlessStage} Cleared!` 
@@ -55,45 +56,45 @@ export function ResultModal() {
               : 'Game Over'}
         </h2>
         
-        <p className="text-gray-600 dark:text-gray-400 mb-5 text-sm">
+        <p className="text-[#8e95a5] mb-5 text-xs sm:text-sm">
           {won 
             ? `Solved in ${guesses.length} guess${guesses.length > 1 ? 'es' : ''}${isTimed ? ` (${timerMaxSeconds - timerSeconds}s)` : ''}.` 
             : `The word was ${targetWord}.`}
         </p>
 
         {/* Stats Showcase */}
-        <div className="w-full bg-gray-50 dark:bg-gray-800/80 rounded-2xl p-4 flex justify-around mb-5 border border-gray-100 dark:border-gray-800">
+        <div className="w-full bg-[#12151c] rounded-2xl p-4 flex justify-around mb-5 border border-[#222735]">
           <div className="flex flex-col items-center">
-            <span className="text-xl font-black text-green-500">+{xpGained}</span>
-            <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">XP Gained</span>
+            <span className="text-xl font-black text-[#2ec47d]">+{xpGained}</span>
+            <span className="text-[10px] text-[#8e95a5] uppercase font-bold tracking-wider">XP Gained</span>
           </div>
 
           {isSurvival ? (
             <>
               <div className="flex flex-col items-center">
-                <span className="text-xl font-black text-orange-500">{survivalStreak}</span>
-                <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Streak</span>
+                <span className="text-xl font-black text-orange-400">{survivalStreak}</span>
+                <span className="text-[10px] text-[#8e95a5] uppercase font-bold tracking-wider">Streak</span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-xl font-black">{survivalLives} ❤️</span>
-                <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Lives Left</span>
+                <span className="text-xl font-black text-red-400">{survivalLives} ❤️</span>
+                <span className="text-[10px] text-[#8e95a5] uppercase font-bold tracking-wider">Lives Left</span>
               </div>
             </>
           ) : isEndless ? (
             <>
               <div className="flex flex-col items-center">
-                <span className="text-xl font-black text-blue-500">Stage {endlessStage}</span>
-                <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Tier</span>
+                <span className="text-xl font-black text-blue-400">Stage {endlessStage}</span>
+                <span className="text-[10px] text-[#8e95a5] uppercase font-bold tracking-wider">Tier</span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-xl font-black text-amber-500">{endlessScore.toLocaleString()}</span>
-                <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Score</span>
+                <span className="text-xl font-black text-amber-400">{endlessScore.toLocaleString()}</span>
+                <span className="text-[10px] text-[#8e95a5] uppercase font-bold tracking-wider">Score</span>
               </div>
             </>
           ) : (
             <div className="flex flex-col items-center">
-              <span className="text-xl font-black">{stats.currentStreak}</span>
-              <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Streak</span>
+              <span className="text-xl font-black text-white">{stats.currentStreak}</span>
+              <span className="text-[10px] text-[#8e95a5] uppercase font-bold tracking-wider">Streak</span>
             </div>
           )}
         </div>
@@ -104,28 +105,28 @@ export function ResultModal() {
           {isSurvival && (won || survivalLives > 0) ? (
             <button 
               onClick={() => nextSurvivalWord()}
-              className="w-full py-3.5 rounded-xl bg-orange-600 text-white font-black text-base hover:bg-orange-700 transition-colors shadow-lg shadow-orange-600/20"
+              className="w-full py-3.5 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm transition-colors shadow-lg shadow-orange-500/20"
             >
               {won ? 'Next Word (Keep Streak 🔥)' : `Next Word (${survivalLives} Lives Left ❤️)`}
             </button>
           ) : isEndless && won ? (
             <button 
               onClick={() => nextEndlessStage()}
-              className="w-full py-3.5 rounded-xl bg-blue-600 text-white font-black text-base hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
+              className="w-full py-3.5 rounded-2xl bg-[#2ec47d] hover:bg-[#28b371] text-black font-black text-sm transition-colors shadow-lg shadow-[#2ec47d]/20"
             >
               Advance to Stage {endlessStage + 1} 📈
             </button>
           ) : isChaos ? (
             <button 
               onClick={() => nextChaosWord()}
-              className="w-full py-3.5 rounded-xl bg-purple-600 text-white font-black text-base hover:bg-purple-700 transition-colors shadow-lg shadow-purple-600/20"
+              className="w-full py-3.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-sm transition-colors shadow-lg shadow-purple-600/20"
             >
               Next Chaos Challenge 🌪️
             </button>
           ) : (
             <button 
               onClick={() => resetGame()}
-              className="w-full py-3.5 rounded-xl bg-black text-white dark:bg-white dark:text-black font-black text-base hover:opacity-90 transition-opacity"
+              className="w-full py-3.5 rounded-2xl bg-[#2ec47d] hover:bg-[#28b371] text-black font-black text-sm transition-colors shadow-lg shadow-[#2ec47d]/20"
             >
               {won ? 'Next Word' : 'Try Again'}
             </button>
@@ -134,7 +135,7 @@ export function ResultModal() {
           <div className="flex gap-2 w-full">
             <Link 
               href="/modes"
-              className="flex-1 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 font-bold text-xs hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
+              className="flex-1 py-2.5 rounded-2xl bg-[#222735] hover:bg-[#2a3040] font-bold text-xs text-white transition-colors flex items-center justify-center border border-[#2e3547]"
             >
               Other Modes
             </Link>
@@ -154,7 +155,7 @@ export function ResultModal() {
                 await navigator.clipboard.writeText(text);
                 toast.success("Result copied to clipboard!");
               }}
-              className="flex-1 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 font-bold text-xs hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-blue-600 dark:text-blue-400 flex items-center justify-center"
+              className="flex-1 py-2.5 rounded-2xl bg-[#222735] hover:bg-[#2a3040] font-bold text-xs text-blue-400 transition-colors flex items-center justify-center border border-[#2e3547]"
             >
               Share Result 🔗
             </button>

@@ -4,6 +4,7 @@ import { evaluateGuess, EvaluatedLetter } from '../engine/guess-evaluator';
 import { isValidWord, getRandomWord, validateHardMode } from '../engine/word-validator';
 import { usePlayerStore } from './player-store';
 import { useSettingsStore } from './settings-store';
+import { sounds } from '../lib/sound';
 
 export type GameStatus = 'playing' | 'won' | 'lost';
 export type GameMode = 'classic' | 'daily' | 'unlimited' | 'timed' | 'survival' | 'endless' | 'chaos' | 'custom';
@@ -45,6 +46,7 @@ interface GameState {
   status: GameStatus;
   error: string | null;
   hints: string[];
+  hintsRemaining: number;
 
   // Mode-specific state
   // Timed
@@ -97,6 +99,7 @@ export const useGameStore = create<GameState>()(
       status: 'playing',
       error: null,
       hints: [],
+      hintsRemaining: 2,
 
       // Timed
       timerSeconds: 60,
@@ -148,13 +151,22 @@ export const useGameStore = create<GameState>()(
         const { currentGuess, targetWord, guesses, maxGuesses, status, gameMode, chaosModifier, timerSeconds, timerMaxSeconds, survivalLives, survivalStreak, survivalBest, endlessStage, endlessScore } = get();
         if (status !== 'playing') return;
         
+        const triggerFeedbackError = (msg: string) => {
+          const { soundEnabled, hapticsEnabled } = useSettingsStore.getState();
+          if (soundEnabled) sounds.playError();
+          if (hapticsEnabled && typeof navigator !== 'undefined' && navigator.vibrate) {
+            navigator.vibrate([20, 50, 20]);
+          }
+          set({ error: msg });
+        };
+
         if (currentGuess.length !== targetWord.length) {
-          set({ error: 'Not enough letters' });
+          triggerFeedbackError('Not enough letters');
           return;
         }
 
         if (!isValidWord(currentGuess)) {
-          set({ error: 'Not in word list' });
+          triggerFeedbackError('Not in word list');
           return;
         }
 
@@ -188,6 +200,9 @@ export const useGameStore = create<GameState>()(
 
         if (currentGuess === targetWord) {
           newStatus = 'won';
+          if (useSettingsStore.getState().soundEnabled) {
+            sounds.playWin();
+          }
 
           // Mode-specific win rewards & progression
           if (gameMode === 'survival') {
@@ -273,6 +288,7 @@ export const useGameStore = create<GameState>()(
           status: 'playing',
           error: null,
           hints: [],
+          hintsRemaining: 2,
           timerSeconds: timerMax,
           timerMaxSeconds: timerMax,
           timerRunning: mode === 'timed' || (mode === 'chaos' && chaosMod?.id === 'speed'),
@@ -313,6 +329,7 @@ export const useGameStore = create<GameState>()(
           status: 'playing',
           error: null,
           hints: [],
+          hintsRemaining: 2,
           maxGuesses: allowedGuesses,
           timerSeconds: timerMax,
           timerMaxSeconds: timerMax,
@@ -347,6 +364,7 @@ export const useGameStore = create<GameState>()(
           status: 'playing',
           error: null,
           hints: [],
+          hintsRemaining: 2,
           maxGuesses: 6,
         });
       },
@@ -366,6 +384,7 @@ export const useGameStore = create<GameState>()(
           status: 'playing',
           error: null,
           hints: [],
+          hintsRemaining: 2,
         });
       },
 
@@ -385,6 +404,7 @@ export const useGameStore = create<GameState>()(
           status: 'playing',
           error: null,
           hints: [],
+          hintsRemaining: 2,
           chaosModifier: chaosMod,
           timerSeconds: timerMax,
           timerMaxSeconds: timerMax,
@@ -407,18 +427,18 @@ export const useGameStore = create<GameState>()(
           status: 'playing',
           error: null,
           hints: [],
+          hintsRemaining: 2,
         });
       },
       
       clearError: () => set({ error: null }),
 
       useHint: () => {
-        const { targetWord, hints, status } = get();
+        const { targetWord, hints, status, hintsRemaining } = get();
         if (status !== 'playing') return;
 
-        const playerState = usePlayerStore.getState();
-        if (playerState.stats.totalXP < 50) {
-          set({ error: 'Not enough XP for a hint (Need 50)' });
+        if (hintsRemaining <= 0) {
+          set({ error: 'No hints left (Max 2 free hints per game)' });
           return;
         }
 
@@ -426,17 +446,18 @@ export const useGameStore = create<GameState>()(
         const unrevealedLetters = targetLetters.filter(l => !hints.includes(l));
 
         if (unrevealedLetters.length === 0) {
-          set({ error: 'All letters revealed' });
+          set({ error: 'All letters already revealed' });
           return;
         }
 
         const hintLetter = unrevealedLetters[Math.floor(Math.random() * unrevealedLetters.length)];
-        
-        usePlayerStore.setState(prev => ({
-          stats: { ...prev.stats, totalXP: prev.stats.totalXP - 50 }
-        }));
+        const remaining = hintsRemaining - 1;
 
-        set({ hints: [...hints, hintLetter], error: `Hint: Contains '${hintLetter}'` });
+        set({ 
+          hints: [...hints, hintLetter], 
+          hintsRemaining: remaining,
+          error: `Hint: Word contains '${hintLetter}' (${remaining} left)` 
+        });
       }
     }),
     {
