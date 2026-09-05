@@ -17,6 +17,7 @@ const ROWS = [
 
 export function Keyboard() {
   const { addLetter, removeLetter, submitGuess, guesses, targetWord } = useGameStore();
+  const colorblindMode = useSettingsStore(state => state.colorblindMode);
 
   // Determine keyboard letter states based on past guesses
   const letterStates = new Map<string, LetterState>();
@@ -94,17 +95,25 @@ export function Keyboard() {
                   handleKey(key);
                 }}
                 className={cn(
-                  "flex items-center justify-center rounded-xl font-extrabold uppercase transition-all h-12 sm:h-14 flex-1 max-w-[2.6rem] sm:max-w-[3.2rem] shadow-sm active:scale-95 outline-none focus:outline-none",
+                  "relative flex items-center justify-center rounded-xl font-extrabold uppercase transition-all h-12 sm:h-14 flex-1 max-w-[2.6rem] sm:max-w-[3.2rem] shadow-sm active:scale-95 outline-none focus:outline-none",
                   {
                     "max-w-[4rem] sm:max-w-[4.8rem] px-1 text-[11px] sm:text-xs tracking-wider": isSpecial,
                     "bg-[var(--key-bg)] hover:brightness-110 text-[var(--key-text)]": !state,
                     "bg-[var(--tile-bg-absent)] text-[var(--tile-text-absent)] opacity-60": state === 'absent',
-                    "bg-[var(--tile-bg-present)] text-[var(--tile-text-present)] shadow-md": state === 'present',
-                    "bg-[var(--tile-bg-correct)] text-[var(--tile-text-correct)] shadow-md": state === 'correct',
+                    "bg-[#0284c7] text-white shadow-md": state === 'present' && colorblindMode,
+                    "bg-[var(--tile-bg-present)] text-[var(--tile-text-present)] shadow-md": state === 'present' && !colorblindMode,
+                    "bg-[#f97316] text-white shadow-md": state === 'correct' && colorblindMode,
+                    "bg-[var(--tile-bg-correct)] text-[var(--tile-text-correct)] shadow-md": state === 'correct' && !colorblindMode,
                   }
                 )}
               >
                 {key === 'BACKSPACE' ? <Delete size={18} /> : key}
+                {colorblindMode && state === 'correct' && (
+                  <span className="absolute top-0.5 right-1 text-[7px] font-black text-white/90 leading-none select-none">✓</span>
+                )}
+                {colorblindMode && state === 'present' && (
+                  <span className="absolute top-0.5 right-1 text-[6px] font-black text-white/90 leading-none select-none">●</span>
+                )}
               </button>
             );
           })}

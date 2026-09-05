@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useGameStore } from '@/store/game-store';
+import { useSettingsStore } from '@/store/settings-store';
+import { getTranslation } from '@/lib/translations';
 import { Tile } from './Tile';
 import { evaluateGuess } from '@/engine/guess-evaluator';
 import { motion } from 'framer-motion';
@@ -20,6 +22,7 @@ export function Board() {
     gameMode,
     chaosModifier
   } = useGameStore();
+  const { animationSpeed, interfaceLanguage } = useSettingsStore();
   const [shake, setShake] = useState(false);
 
   const isFog = gameMode === 'chaos' && chaosModifier?.id === 'fog';
@@ -45,7 +48,7 @@ export function Board() {
         {/* Floating Error Toast Notification */}
         {error && (
           <div className="absolute -top-12 left-0 right-0 flex justify-center z-20 pointer-events-none">
-            <span className="bg-[#1f2433] text-white border border-[#323a4f] px-4 py-2 rounded-2xl shadow-2xl font-bold text-xs sm:text-sm text-center tracking-wide">
+            <span className="bg-[var(--surface)] text-[var(--foreground)] border border-[var(--surface-border)] px-4 py-2 rounded-2xl shadow-2xl font-bold text-xs sm:text-sm text-center tracking-wide">
               {error}
             </span>
           </div>
@@ -54,6 +57,7 @@ export function Board() {
         {guesses.map((guess, i) => {
           const evaluated = evaluateGuess(guess, targetWord);
           const isWinningRow = status === 'won' && i === guesses.length - 1;
+          const winDuration = animationSpeed === 'off' ? 0 : animationSpeed === 'fast' ? 0.2 : 0.5;
           
           return (
             <div key={i} className="flex gap-2 justify-center">
@@ -61,8 +65,8 @@ export function Board() {
                 <motion.div 
                   key={j}
                   initial={false}
-                  animate={isWinningRow ? { y: [0, -20, 0] } : {}}
-                  transition={isWinningRow ? { duration: 0.5, delay: j * 0.1, ease: "easeInOut" } : {}}
+                  animate={isWinningRow && animationSpeed !== 'off' ? { y: [0, -20, 0] } : {}}
+                  transition={isWinningRow ? { duration: winDuration, delay: animationSpeed === 'fast' ? j * 0.04 : j * 0.1, ease: "easeInOut" } : {}}
                 >
                   <Tile letter={e.letter} state={e.state} fogged={isFog && i < guesses.length - 1} />
                 </motion.div>
@@ -107,12 +111,12 @@ export function Board() {
             useHint();
           }}
           disabled={hintsRemaining <= 0 || status !== 'playing'}
-          className="flex items-center gap-1.5 text-xs font-black bg-[#1a1f2b] hover:bg-[#242b3c] text-white border border-[#2b3346] px-4 py-2 rounded-full shadow-lg transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed outline-none focus:outline-none"
+          className="flex items-center gap-1.5 text-xs font-black bg-[var(--surface)] hover:bg-[var(--surface-border)] text-[var(--foreground)] border border-[var(--surface-border)] px-4 py-2 rounded-full shadow-lg transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed outline-none focus:outline-none"
         >
           <span className="text-yellow-400 text-sm">💡</span>
-          <span>Hint</span>
-          <span className="ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-black bg-yellow-400/20 text-yellow-300">
-            {hintsRemaining} free
+          <span>{getTranslation(interfaceLanguage, 'hint')}</span>
+          <span className="ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-black bg-yellow-400/20 text-yellow-600 dark:text-yellow-300">
+            {hintsRemaining} {getTranslation(interfaceLanguage, 'free')}
           </span>
         </button>
       </div>

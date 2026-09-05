@@ -1,6 +1,7 @@
 import words4 from '../data/words/4.json';
 import words5 from '../data/words/5.json';
 import words6 from '../data/words/6.json';
+import { MULTILANG_WORDS } from '../data/words/multilang';
 
 type WordDictionary = {
   answers: string[];
@@ -13,12 +14,19 @@ const dictionaries: Record<number, WordDictionary> = {
   6: words6,
 };
 
+export function getDictionary(length: number, lang?: string): WordDictionary | undefined {
+  if (lang && MULTILANG_WORDS[lang]?.[length]) {
+    return MULTILANG_WORDS[lang][length];
+  }
+  return dictionaries[length];
+}
+
 /**
  * Checks if a word is valid (either an answer or an allowed guess).
  */
-export function isValidWord(word: string): boolean {
+export function isValidWord(word: string, lang?: string): boolean {
   const length = word.length;
-  const dict = dictionaries[length];
+  const dict = getDictionary(length, lang);
   if (!dict) return false;
 
   const upperWord = word.toUpperCase();
@@ -28,10 +36,12 @@ export function isValidWord(word: string): boolean {
 /**
  * Returns a random target word for a given length.
  */
-export function getRandomWord(length: number): string {
-  const dict = dictionaries[length];
+export function getRandomWord(length: number, lang?: string): string {
+  const dict = getDictionary(length, lang);
   if (!dict || dict.answers.length === 0) {
-    throw new Error(`No dictionary available for length ${length}`);
+    const fallback = dictionaries[length];
+    if (!fallback) throw new Error(`No dictionary available for length ${length}`);
+    return fallback.answers[Math.floor(Math.random() * fallback.answers.length)];
   }
 
   const randomIndex = Math.floor(Math.random() * dict.answers.length);
@@ -41,8 +51,8 @@ export function getRandomWord(length: number): string {
 /**
  * Generates a deterministic daily word based on the date.
  */
-export function getDailyWord(length: number, dateString: string): string {
-  const dict = dictionaries[length];
+export function getDailyWord(length: number, dateString: string, lang?: string): string {
+  const dict = getDictionary(length, lang) || dictionaries[length];
   if (!dict || dict.answers.length === 0) {
     throw new Error(`No dictionary available for length ${length}`);
   }

@@ -6,10 +6,11 @@ import { ChevronLeft, Check } from 'lucide-react';
 import { Tile } from '@/components/game/Tile';
 
 const COLOR_THEMES: { id: ColorTheme; name: string; primary: string; secondary: string }[] = [
+  { id: 'classic', name: 'High Contrast', primary: '#f97316', secondary: '#0284c7' },
+  { id: 'forest', name: 'Forest', primary: '#2ec47d', secondary: '#d39e33' },
   { id: 'aurora', name: 'Aurora', primary: '#8b5cf6', secondary: '#f97316' },
   { id: 'sunset', name: 'Sunset', primary: '#ec4899', secondary: '#fb923c' },
   { id: 'ocean', name: 'Ocean', primary: '#06b6d4', secondary: '#3b82f6' },
-  { id: 'forest', name: 'Forest', primary: '#2ec47d', secondary: '#d39e33' },
   { id: 'candy', name: 'Candy', primary: '#d946ef', secondary: '#14b8a6' },
   { id: 'mono', name: 'Mono', primary: '#f8fafc', secondary: '#64748b' },
 ];
@@ -43,16 +44,16 @@ export default function CustomizationPage() {
       <header className="flex items-center gap-3">
         <Link 
           href="/settings"
-          className="h-10 w-10 rounded-2xl bg-[#191d27] border border-[#262b38] flex items-center justify-center hover:bg-[#202532] transition-colors"
+          className="h-10 w-10 rounded-2xl bg-[var(--surface)] border border-[var(--surface-border)] flex items-center justify-center hover:bg-[var(--background)] transition-colors"
         >
-          <ChevronLeft size={20} className="text-white" />
+          <ChevronLeft size={20} className="text-[var(--foreground)]" />
         </Link>
-        <h1 className="text-2xl font-black tracking-wide text-white">Customization</h1>
+        <h1 className="text-2xl font-black tracking-wide text-[var(--foreground)]">Customization</h1>
       </header>
 
       {/* Live Preview Card */}
-      <div className="w-full bg-[#181c26] border border-[#262b39] rounded-3xl p-6 flex flex-col items-center gap-4 shadow-xl">
-        <span className="text-[11px] font-black uppercase tracking-widest text-[#8e95a5]">
+      <div className="w-full bg-[var(--surface)] border border-[var(--surface-border)] rounded-3xl p-6 flex flex-col items-center gap-4 shadow-xl">
+        <span className="text-[11px] font-black uppercase tracking-widest text-[var(--foreground-muted)]">
           LIVE PREVIEW
         </span>
 
@@ -67,7 +68,7 @@ export default function CustomizationPage() {
 
       {/* Color theme Section */}
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-black text-white">Color theme</h2>
+        <h2 className="text-base font-black text-[var(--foreground)]">Color theme</h2>
 
         <div className="grid grid-cols-3 gap-3">
           {COLOR_THEMES.map((t) => {
@@ -77,10 +78,10 @@ export default function CustomizationPage() {
                 key={t.id}
                 type="button"
                 onClick={() => setTheme(t.id)}
-                className={`relative flex flex-col items-center justify-center p-4 rounded-3xl bg-[#181c26] border transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                className={`relative flex flex-col items-center justify-center p-4 rounded-3xl bg-[var(--surface)] border transition-all hover:scale-[1.02] active:scale-[0.98] ${
                   isSelected 
                     ? 'border-[#2ec47d] shadow-lg shadow-[#2ec47d]/10' 
-                    : 'border-[#262b39] hover:border-[#343b4f]'
+                    : 'border-[var(--surface-border)] hover:border-[#343b4f]'
                 }`}
               >
                 {isSelected && (
@@ -100,7 +101,7 @@ export default function CustomizationPage() {
                   />
                 </div>
 
-                <span className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-gray-400'}`}>
+                <span className={`text-xs font-bold ${isSelected ? 'text-[var(--foreground)]' : 'text-[var(--foreground-muted)]'}`}>
                   {t.name}
                 </span>
               </button>
@@ -111,7 +112,7 @@ export default function CustomizationPage() {
 
       {/* Tile shape Section */}
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-black text-white">Tile shape</h2>
+        <h2 className="text-base font-black text-[var(--foreground)]">Tile shape</h2>
 
         <div className="grid grid-cols-3 gap-3">
           {TILE_SHAPES.map((s) => {
@@ -121,10 +122,10 @@ export default function CustomizationPage() {
                 key={s.id}
                 type="button"
                 onClick={() => setTileShape(s.id)}
-                className={`flex flex-col items-center justify-center p-4 rounded-3xl bg-[#181c26] border transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                className={`flex flex-col items-center justify-center p-4 rounded-3xl bg-[var(--surface)] border transition-all hover:scale-[1.02] active:scale-[0.98] ${
                   isSelected 
                     ? 'border-[#2ec47d] shadow-lg shadow-[#2ec47d]/10' 
-                    : 'border-[#262b39] hover:border-[#343b4f]'
+                    : 'border-[var(--surface-border)] hover:border-[#343b4f]'
                 }`}
               >
                 <div 
@@ -132,7 +133,7 @@ export default function CustomizationPage() {
                     s.id === 'rounded' ? 'rounded-xl' : s.id === 'circle' ? 'rounded-full' : 'rounded-md'
                   }`}
                 />
-                <span className={`text-xs font-bold ${isSelected ? 'text-[#2ec47d]' : 'text-gray-400'}`}>
+                <span className={`text-xs font-bold ${isSelected ? 'text-[#2ec47d]' : 'text-[var(--foreground-muted)]'}`}>
                   {s.name}
                 </span>
               </button>
@@ -143,7 +144,7 @@ export default function CustomizationPage() {
 
       {/* Letter font Section */}
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-black text-white">Letter font</h2>
+        <h2 className="text-base font-black text-[var(--foreground)]">Letter font</h2>
 
         <div className="grid grid-cols-4 gap-2.5">
           {LETTER_FONTS.map((f) => {
@@ -153,16 +154,16 @@ export default function CustomizationPage() {
                 key={f.id}
                 type="button"
                 onClick={() => setLetterFont(f.id)}
-                className={`flex flex-col items-center justify-center p-3 sm:p-4 rounded-3xl bg-[#181c26] border transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                className={`flex flex-col items-center justify-center p-3 sm:p-4 rounded-3xl bg-[var(--surface)] border transition-all hover:scale-[1.02] active:scale-[0.98] ${
                   isSelected 
                     ? 'border-[#2ec47d] shadow-lg shadow-[#2ec47d]/10' 
-                    : 'border-[#262b39] hover:border-[#343b4f]'
+                    : 'border-[var(--surface-border)] hover:border-[#343b4f]'
                 }`}
               >
-                <span className={`text-xl sm:text-2xl text-white mb-1.5 ${f.fontClass}`}>
+                <span className={`text-xl sm:text-2xl text-[var(--foreground)] mb-1.5 ${f.fontClass}`}>
                   Ag
                 </span>
-                <span className={`text-[11px] sm:text-xs font-bold ${isSelected ? 'text-[#2ec47d]' : 'text-gray-400'}`}>
+                <span className={`text-[11px] sm:text-xs font-bold ${isSelected ? 'text-[#2ec47d]' : 'text-[var(--foreground-muted)]'}`}>
                   {f.name}
                 </span>
               </button>

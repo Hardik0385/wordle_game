@@ -33,6 +33,8 @@ interface SettingsState {
   toggleShowTimer: () => void;
   setAnimationSpeed: (speed: 'normal' | 'fast' | 'off') => void;
   setWordLength: (length: number) => void;
+  setGameLanguage: (lang: string) => void;
+  setInterfaceLanguage: (lang: string) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -63,6 +65,8 @@ export const useSettingsStore = create<SettingsState>()(
       toggleShowTimer: () => set((state) => ({ showTimer: !state.showTimer })),
       setAnimationSpeed: (animationSpeed) => set({ animationSpeed }),
       setWordLength: (wordLength) => set({ wordLength }),
+      setGameLanguage: (gameLanguage) => set({ gameLanguage }),
+      setInterfaceLanguage: (interfaceLanguage) => set({ interfaceLanguage }),
     }),
     {
       name: 'wordly-settings-storage',

@@ -15,19 +15,22 @@ interface TileProps {
 }
 
 export function Tile({ letter, state, isCurrent, fogged, overrideShape, overrideFont }: TileProps) {
-  const { tileShape: storeShape, letterFont: storeFont } = useSettingsStore();
+  const { tileShape: storeShape, letterFont: storeFont, colorblindMode, animationSpeed } = useSettingsStore();
 
   const shape = overrideShape || storeShape;
   const font = overrideFont || storeFont;
   const isEvaluated = !!state;
 
+  const duration = animationSpeed === 'off' ? 0 : animationSpeed === 'fast' ? 0.15 : 0.5;
+
   return (
     <motion.div
       initial={false}
-      animate={isEvaluated ? { rotateX: [0, 90, 0] } : {}}
-      transition={{ duration: 0.5, ease: "easeInOut" }}
+      animate={isEvaluated && animationSpeed !== 'off' ? { rotateX: [0, 90, 0] } : {}}
+      transition={{ duration, ease: "easeInOut" }}
       className={cn(
-        "flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center border-2 text-2xl font-bold uppercase transition-all duration-300 select-none",
+        "relative flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center border-2 text-2xl font-bold uppercase select-none",
+        animationSpeed !== 'off' ? (animationSpeed === 'fast' ? "transition-all duration-150" : "transition-all duration-300") : "transition-none",
         // Shape
         {
           "rounded-2xl": shape === 'rounded',
@@ -51,14 +54,22 @@ export function Tile({ letter, state, isCurrent, fogged, overrideShape, override
           "border-slate-500 bg-[var(--tile-bg-absent)] text-[var(--tile-text-absent)] opacity-70": fogged && state,
           // Absent (greyed out)
           "border-[var(--tile-border-absent)] bg-[var(--tile-bg-absent)] text-[var(--tile-text-absent)]": !fogged && state === 'absent',
-          // Present (theme present color, e.g. gold / orange / teal)
-          "border-[var(--tile-bg-present)] bg-[var(--tile-bg-present)] text-[var(--tile-text-present)] shadow-md": !fogged && state === 'present',
-          // Correct (theme correct color, e.g. emerald / purple / pink)
-          "border-[var(--tile-bg-correct)] bg-[var(--tile-bg-correct)] text-[var(--tile-text-correct)] shadow-md": !fogged && state === 'correct',
+          // Present (Colorblind high-contrast blue vs theme present color)
+          "border-[#0284c7] bg-[#0284c7] text-white shadow-md": !fogged && state === 'present' && colorblindMode,
+          "border-[var(--tile-bg-present)] bg-[var(--tile-bg-present)] text-[var(--tile-text-present)] shadow-md": !fogged && state === 'present' && !colorblindMode,
+          // Correct (Colorblind high-contrast orange vs theme correct color)
+          "border-[#f97316] bg-[#f97316] text-white shadow-md": !fogged && state === 'correct' && colorblindMode,
+          "border-[var(--tile-bg-correct)] bg-[var(--tile-bg-correct)] text-[var(--tile-text-correct)] shadow-md": !fogged && state === 'correct' && !colorblindMode,
         }
       )}
     >
       {letter}
+      {colorblindMode && !fogged && state === 'correct' && (
+        <span className="absolute top-1 right-1 text-[9px] font-black text-white/90 leading-none select-none">✓</span>
+      )}
+      {colorblindMode && !fogged && state === 'present' && (
+        <span className="absolute top-1 right-1 text-[8px] font-black text-white/90 leading-none select-none">●</span>
+      )}
     </motion.div>
   );
 }

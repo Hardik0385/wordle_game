@@ -2,6 +2,7 @@
 
 import { useGameStore } from '@/store/game-store';
 import { useSettingsStore } from '@/store/settings-store';
+import { getTranslation } from '@/lib/translations';
 import Link from 'next/link';
 import { 
   ChevronLeft, 
@@ -41,7 +42,7 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
     customChallengeWord
   } = useGameStore();
 
-  const showTimerSetting = useSettingsStore(state => state.showTimer);
+  const { showTimer: showTimerSetting, interfaceLanguage } = useSettingsStore();
   const [showHelp, setShowHelp] = useState(false);
 
   const isTimedChallenge = gameMode === 'timed' || (gameMode === 'chaos' && chaosModifier?.id === 'speed');
@@ -49,8 +50,8 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
   const isTimerUrgent = isTimedChallenge && timerSeconds <= 15;
 
   const modeDisplayName = 
-    gameMode === 'classic' ? 'Classic' :
-    gameMode === 'daily' ? 'Daily' :
+    gameMode === 'classic' ? getTranslation(interfaceLanguage, 'classic') :
+    gameMode === 'daily' ? getTranslation(interfaceLanguage, 'daily') :
     gameMode === 'unlimited' ? 'Practice' :
     gameMode === 'timed' ? 'Timed' :
     gameMode === 'survival' ? 'Survival' :
@@ -58,7 +59,7 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
     gameMode === 'chaos' ? 'Chaos' : 'Custom';
 
   const modeSubtitle = 
-    gameMode === 'classic' ? 'STANDARD' :
+    gameMode === 'classic' ? getTranslation(interfaceLanguage, 'standard') :
     gameMode === 'daily' ? 'OFFICIAL CHALLENGE' :
     gameMode === 'unlimited' ? 'UNLIMITED' :
     gameMode === 'timed' ? 'SPEED RUSH' :
@@ -68,22 +69,22 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
 
   return (
     <div className="w-full max-w-lg mb-4 flex flex-col gap-3">
-      {/* Clean Top Header matching Image 3 */}
+      {/* Clean Top Header */}
       <div className="flex items-center justify-between py-1">
         {/* Back button */}
         <Link
           href="/modes"
-          className="h-10 w-10 rounded-2xl bg-[#191d27] border border-[#262b38] flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#202532] transition-colors"
+          className="h-10 w-10 rounded-2xl bg-[var(--surface)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background)] transition-colors"
         >
           <ChevronLeft size={20} />
         </Link>
 
         {/* Center Mode Title & Subtitle */}
         <div className="flex flex-col items-center text-center">
-          <h1 className="text-lg font-black text-white tracking-wide">
+          <h1 className="text-lg font-black text-[var(--foreground)] tracking-wide">
             {modeDisplayName}
           </h1>
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#8e95a5]">
+          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--foreground-muted)]">
             {modeSubtitle}
           </span>
         </div>
@@ -93,14 +94,14 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
           <button
             type="button"
             onClick={() => setShowHelp(!showHelp)}
-            className="h-10 w-10 rounded-2xl bg-[#191d27] border border-[#262b38] flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#202532] transition-colors"
+            className="h-10 w-10 rounded-2xl bg-[var(--surface)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background)] transition-colors"
           >
             <HelpCircle size={18} />
           </button>
 
           <Link
             href="/stats"
-            className="h-10 w-10 rounded-2xl bg-[#191d27] border border-[#262b38] flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#202532] transition-colors"
+            className="h-10 w-10 rounded-2xl bg-[var(--surface)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background)] transition-colors"
           >
             <BarChart2 size={18} />
           </Link>
@@ -109,16 +110,16 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
 
       {/* Help Drawer / Modal if opened */}
       {showHelp && (
-        <div className="bg-[#181c26] border border-[#282f42] p-4 rounded-3xl text-xs text-gray-300 flex flex-col gap-2 shadow-xl animate-in fade-in">
-          <div className="font-bold text-white flex justify-between items-center">
-            <span>How to Play Wordly</span>
-            <button onClick={() => setShowHelp(false)} className="text-gray-400 hover:text-white font-black">✕</button>
+        <div className="bg-[var(--surface)] border border-[var(--surface-border)] p-4 rounded-3xl text-xs text-[var(--foreground-muted)] flex flex-col gap-2 shadow-xl animate-in fade-in">
+          <div className="font-bold text-[var(--foreground)] flex justify-between items-center">
+            <span>{getTranslation(interfaceLanguage, 'how_to_play')}</span>
+            <button onClick={() => setShowHelp(false)} className="text-[var(--foreground-muted)] hover:text-[var(--foreground)] font-black">✕</button>
           </div>
-          <p>Guess the word in {maxGuesses} attempts.</p>
-          <p>• Green tile: Correct letter in the exact position.</p>
-          <p>• Yellow tile: Letter exists in the word but in another spot.</p>
-          <p>• Dark tile: Letter does not appear in the word.</p>
-          <p className="text-[#2ec47d] font-bold">💡 You have 2 FREE hints every game!</p>
+          <p>{getTranslation(interfaceLanguage, 'rules_desc')} ({maxGuesses})</p>
+          <p>• {getTranslation(interfaceLanguage, 'green_tile')}</p>
+          <p>• {getTranslation(interfaceLanguage, 'yellow_tile')}</p>
+          <p>• {getTranslation(interfaceLanguage, 'dark_tile')}</p>
+          <p className="text-[#2ec47d] font-bold">💡 {getTranslation(interfaceLanguage, 'two_hints_notice')}</p>
         </div>
       )}
 
@@ -126,16 +127,16 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
       
       {/* 1. TIMED MODE OR CHAOS SPEED COUNTDOWN HUD */}
       {isTimedChallenge && (
-        <div className="flex flex-col gap-1.5 bg-[#181c26] p-3 rounded-2xl border border-[#262b38]">
+        <div className="flex flex-col gap-1.5 bg-[var(--surface)] p-3 rounded-2xl border border-[var(--surface-border)]">
           <div className="flex justify-between items-center text-xs font-bold">
-            <span className="flex items-center gap-1 text-[#8e95a5]">
-              <Clock size={14} className={isTimerUrgent ? 'text-red-400 animate-spin' : ''} /> Time Remaining
+            <span className="flex items-center gap-1 text-[var(--foreground-muted)]">
+              <Clock size={14} className={isTimerUrgent ? 'text-red-400 animate-spin' : ''} /> {getTranslation(interfaceLanguage, 'time_remaining')}
             </span>
             <span className={`text-sm font-black ${isTimerUrgent ? 'text-red-400 animate-pulse' : 'text-[#2ec47d]'}`}>
               {timerSeconds}s
             </span>
           </div>
-          <div className="w-full h-2 bg-[#222735] rounded-full overflow-hidden">
+          <div className="w-full h-2 bg-[var(--background)] rounded-full overflow-hidden">
             <div 
               className={`h-full transition-all duration-1000 ease-linear rounded-full ${
                 isTimerUrgent 
@@ -150,11 +151,11 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
         </div>
       )}
 
-      {/* CASUAL ELAPSED TIMER HUD (if user enabled "Show Timer" in casual modes) */}
+      {/* CASUAL ELAPSED TIMER HUD */}
       {showTimerSetting && !isTimedChallenge && (
-        <div className="flex items-center justify-between bg-[#181c26] px-4 py-2 rounded-2xl border border-[#262b38] text-xs font-bold">
-          <span className="flex items-center gap-1.5 text-[#8e95a5]">
-            <Clock size={14} className="text-[#2ec47d]" /> Time Elapsed
+        <div className="flex items-center justify-between bg-[var(--surface)] px-4 py-2 rounded-2xl border border-[var(--surface-border)] text-xs font-bold">
+          <span className="flex items-center gap-1.5 text-[var(--foreground-muted)]">
+            <Clock size={14} className="text-[#2ec47d]" /> {getTranslation(interfaceLanguage, 'time_elapsed')}
           </span>
           <span className="text-sm font-black text-[#2ec47d] font-mono tabular-nums">
             {Math.floor((elapsedSeconds || 0) / 60)}:{String((elapsedSeconds || 0) % 60).padStart(2, '0')}

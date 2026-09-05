@@ -166,7 +166,8 @@ export const useGameStore = create<GameState>()(
           return;
         }
 
-        if (!isValidWord(currentGuess)) {
+        const currentLang = useSettingsStore.getState().gameLanguage;
+        if (!isValidWord(currentGuess, currentLang)) {
           triggerFeedbackError('Not in word list');
           return;
         }
@@ -279,7 +280,8 @@ export const useGameStore = create<GameState>()(
           guesses = options?.maxGuesses || get().customMaxGuesses || 6;
         }
 
-        const target = options?.customTarget ? options.customTarget.toUpperCase() : getRandomWord(length);
+        const currentLang = useSettingsStore.getState().gameLanguage;
+        const target = options?.customTarget ? options.customTarget.toUpperCase() : getRandomWord(length, currentLang);
 
         set({
           gameMode: mode,
@@ -323,7 +325,8 @@ export const useGameStore = create<GameState>()(
           }
         }
 
-        const target = newTarget ? newTarget.toUpperCase() : getRandomWord(targetLen);
+        const currentLang = useSettingsStore.getState().gameLanguage;
+        const target = newTarget ? newTarget.toUpperCase() : getRandomWord(targetLen, currentLang);
 
         set({
           targetWord: target,

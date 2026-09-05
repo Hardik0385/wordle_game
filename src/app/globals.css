@@ -101,11 +101,11 @@
   --tile-text-present: #ffffff;
 }
 
-/* 7. Classic */
+/* 7. Classic / High Contrast */
 [data-theme='classic'] {
-  --tile-bg-correct: #22c55e;
+  --tile-bg-correct: #f97316;
   --tile-text-correct: #ffffff;
-  --tile-bg-present: #eab308;
+  --tile-bg-present: #0284c7;
   --tile-text-present: #ffffff;
 }
 
@@ -136,7 +136,9 @@
 }
 
 /* Colorblind Mode high-contrast overrides */
-[data-colorblind='true'] {
+[data-colorblind='true'],
+:root[data-colorblind='true'],
+html[data-colorblind='true'] {
   --tile-bg-correct: #f97316 !important;
   --tile-text-correct: #ffffff !important;
   --tile-bg-present: #0284c7 !important;
@@ -144,11 +146,15 @@
 }
 
 /* Animation Speed Overrides */
-[data-animation='fast'] * {
+[data-animation='fast'] *,
+[data-animation='fast'] *::before,
+[data-animation='fast'] *::after {
   animation-duration: 0.15s !important;
   transition-duration: 0.15s !important;
 }
-[data-animation='off'] * {
+[data-animation='off'] *,
+[data-animation='off'] *::before,
+[data-animation='off'] *::after {
   animation: none !important;
   transition: none !important;
 }

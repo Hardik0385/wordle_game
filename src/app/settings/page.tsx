@@ -23,6 +23,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { getTranslation } from '@/lib/translations';
 
 export default function SettingsPage() {
   const { 
@@ -44,7 +45,9 @@ export default function SettingsPage() {
     animationSpeed,
     setAnimationSpeed,
     gameLanguage,
-    interfaceLanguage
+    setGameLanguage,
+    interfaceLanguage,
+    setInterfaceLanguage
   } = useSettingsStore();
 
   const { name, setName } = usePlayerStore();
@@ -131,7 +134,7 @@ export default function SettingsPage() {
   return (
     <main className="p-4 sm:p-8 max-w-xl mx-auto flex flex-col gap-6 select-none pb-24">
       <header>
-        <h1 className="text-3xl font-black text-[var(--foreground)]">Settings</h1>
+        <h1 className="text-3xl font-black text-[var(--foreground)]">{getTranslation(interfaceLanguage, 'settings_title')}</h1>
       </header>
 
       {/* Profile Name Card */}
@@ -153,7 +156,7 @@ export default function SettingsPage() {
       {/* GAMEPLAY SECTION */}
       <section className="flex flex-col gap-2">
         <span className="text-[11px] font-black uppercase tracking-widest text-[var(--foreground-muted)] px-1">
-          GAMEPLAY
+          {getTranslation(interfaceLanguage, 'gameplay')}
         </span>
 
         <div className="bg-[var(--surface)] border border-[var(--surface-border)] rounded-3xl divide-y divide-[var(--surface-border)] overflow-hidden shadow-sm">
@@ -164,7 +167,7 @@ export default function SettingsPage() {
                 <ShieldAlert size={18} />
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-sm font-bold text-[var(--foreground)]">Hard Mode</span>
+                <span className="text-sm font-bold text-[var(--foreground)]">{getTranslation(interfaceLanguage, 'hard_mode')}</span>
                 <button 
                   type="button" 
                   onClick={() => setShowHardModeInfo(!showHardModeInfo)}
@@ -193,7 +196,7 @@ export default function SettingsPage() {
 
           {showHardModeInfo && (
             <div className="p-4 text-xs text-[var(--foreground-muted)] bg-[var(--background)]">
-              Any revealed hints (green or yellow letters) must be used in subsequent guesses.
+              {getTranslation(interfaceLanguage, 'hard_mode_desc')}
             </div>
           )}
 
@@ -203,7 +206,7 @@ export default function SettingsPage() {
               <div className="h-10 w-10 rounded-2xl bg-[var(--background)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground)]">
                 <Type size={18} />
               </div>
-              <span className="text-sm font-bold text-[var(--foreground)]">Word Length</span>
+              <span className="text-sm font-bold text-[var(--foreground)]">{getTranslation(interfaceLanguage, 'word_length')}</span>
             </div>
 
             <select
@@ -211,9 +214,9 @@ export default function SettingsPage() {
               onChange={(e) => handleWordLengthChange(Number(e.target.value))}
               className="bg-[var(--background)] text-[var(--foreground)] text-xs font-bold px-3 py-2 rounded-xl border border-[var(--surface-border)] focus:outline-none cursor-pointer"
             >
-              <option value={4}>4 letters</option>
-              <option value={5}>5 letters</option>
-              <option value={6}>6 letters</option>
+              <option value={4}>4 {getTranslation(interfaceLanguage, 'letters')}</option>
+              <option value={5}>5 {getTranslation(interfaceLanguage, 'letters')}</option>
+              <option value={6}>6 {getTranslation(interfaceLanguage, 'letters')}</option>
             </select>
           </div>
 
@@ -223,7 +226,7 @@ export default function SettingsPage() {
               <div className="h-10 w-10 rounded-2xl bg-[var(--background)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground)]">
                 <Smartphone size={18} />
               </div>
-              <span className="text-sm font-bold text-[var(--foreground)]">Haptics</span>
+              <span className="text-sm font-bold text-[var(--foreground)]">{getTranslation(interfaceLanguage, 'haptics')}</span>
             </div>
 
             <button
@@ -247,7 +250,7 @@ export default function SettingsPage() {
               <div className="h-10 w-10 rounded-2xl bg-[var(--background)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground)]">
                 <Volume2 size={18} />
               </div>
-              <span className="text-sm font-bold text-[var(--foreground)]">Sounds</span>
+              <span className="text-sm font-bold text-[var(--foreground)]">{getTranslation(interfaceLanguage, 'sounds')}</span>
             </div>
 
             <button
@@ -271,7 +274,7 @@ export default function SettingsPage() {
               <div className="h-10 w-10 rounded-2xl bg-[var(--background)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground)]">
                 <Clock size={18} />
               </div>
-              <span className="text-sm font-bold text-[var(--foreground)]">Show Timer</span>
+              <span className="text-sm font-bold text-[var(--foreground)]">{getTranslation(interfaceLanguage, 'show_timer')}</span>
             </div>
 
             <button
@@ -294,7 +297,7 @@ export default function SettingsPage() {
       {/* APPEARANCE SECTION */}
       <section className="flex flex-col gap-2">
         <span className="text-[11px] font-black uppercase tracking-widest text-[var(--foreground-muted)] px-1">
-          APPEARANCE
+          {getTranslation(interfaceLanguage, 'appearance')}
         </span>
 
         <div className="bg-[var(--surface)] border border-[var(--surface-border)] rounded-3xl divide-y divide-[var(--surface-border)] overflow-hidden shadow-sm">
@@ -308,8 +311,8 @@ export default function SettingsPage() {
                 <Palette size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-bold text-[var(--foreground)]">Customization Studio</span>
-                <span className="text-xs text-[var(--foreground-muted)]">Colors, Tile Shapes & Fonts</span>
+                <span className="text-sm font-bold text-[var(--foreground)]">{getTranslation(interfaceLanguage, 'customization')}</span>
+                <span className="text-xs text-[var(--foreground-muted)]">{getTranslation(interfaceLanguage, 'customize_themes')}</span>
               </div>
             </div>
 
@@ -327,7 +330,7 @@ export default function SettingsPage() {
               <div className="h-10 w-10 rounded-2xl bg-[var(--background)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground)]">
                 <Moon size={18} />
               </div>
-              <span className="text-sm font-bold text-[var(--foreground)]">Appearance Mode</span>
+              <span className="text-sm font-bold text-[var(--foreground)]">{getTranslation(interfaceLanguage, 'dark_mode')}</span>
             </div>
 
             <select
@@ -341,27 +344,51 @@ export default function SettingsPage() {
           </div>
 
           {/* Colorblind Mode */}
-          <div className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-2xl bg-[var(--background)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground)]">
-                <Eye size={18} />
+          <div className="p-4 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-2xl bg-[var(--background)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground)]">
+                  <Eye size={18} />
+                </div>
+                <div>
+                  <span className="text-sm font-bold text-[var(--foreground)]">{getTranslation(interfaceLanguage, 'colorblind_mode')}</span>
+                  <p className="text-xs text-[var(--foreground-muted)]">{getTranslation(interfaceLanguage, 'colorblind_desc')}</p>
+                </div>
               </div>
-              <span className="text-sm font-bold text-[var(--foreground)]">Colorblind Mode</span>
+
+              <button
+                type="button"
+                onClick={handleColorblindToggle}
+                className={`w-12 h-7 rounded-full transition-colors relative p-0.5 ${
+                  colorblindMode ? 'bg-[#f97316]' : 'bg-gray-400/40'
+                }`}
+              >
+                <div 
+                  className={`w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-200 ${
+                    colorblindMode ? 'translate-x-5' : 'translate-x-0'
+                  }`} 
+                />
+              </button>
             </div>
 
-            <button
-              type="button"
-              onClick={handleColorblindToggle}
-              className={`w-12 h-7 rounded-full transition-colors relative p-0.5 ${
-                colorblindMode ? 'bg-[#2ec47d]' : 'bg-gray-400/40'
-              }`}
-            >
-              <div 
-                className={`w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-200 ${
-                  colorblindMode ? 'translate-x-5' : 'translate-x-0'
-                }`} 
-              />
-            </button>
+            {/* Live Colorblind Mode Preview */}
+            <div className="p-3 rounded-2xl bg-[var(--background)] border border-[var(--surface-border)] flex flex-wrap items-center justify-between gap-2 text-xs">
+              <span className="font-semibold text-[var(--foreground-muted)]">Live Tile Colors:</span>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-white text-[11px] shadow-sm ${colorblindMode ? 'bg-[#f97316]' : 'bg-[#2ec47d]'}`}>
+                    ✓
+                  </div>
+                  <span className="font-bold text-[var(--foreground)] text-[11px]">{colorblindMode ? 'Orange (Correct)' : 'Green (Correct)'}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-white text-[11px] shadow-sm ${colorblindMode ? 'bg-[#0284c7]' : 'bg-[#d39e33]'}`}>
+                    ●
+                  </div>
+                  <span className="font-bold text-[var(--foreground)] text-[11px]">{colorblindMode ? 'Blue (Present)' : 'Yellow (Present)'}</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Animation Speed */}
@@ -370,7 +397,7 @@ export default function SettingsPage() {
               <div className="h-10 w-10 rounded-2xl bg-[var(--background)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground)]">
                 <Gauge size={18} />
               </div>
-              <span className="text-sm font-bold text-[var(--foreground)]">Animation Speed</span>
+              <span className="text-sm font-bold text-[var(--foreground)]">{getTranslation(interfaceLanguage, 'animation_speed')}</span>
             </div>
 
             <select
@@ -378,9 +405,9 @@ export default function SettingsPage() {
               onChange={(e) => handleAnimationSpeedChange(e.target.value as any)}
               className="bg-[var(--background)] text-[var(--foreground)] text-xs font-bold px-3 py-2 rounded-xl border border-[var(--surface-border)] focus:outline-none cursor-pointer capitalize"
             >
-              <option value="normal">Normal</option>
-              <option value="fast">Fast</option>
-              <option value="off">Off</option>
+              <option value="normal">{getTranslation(interfaceLanguage, 'speed_normal')}</option>
+              <option value="fast">{getTranslation(interfaceLanguage, 'speed_fast')}</option>
+              <option value="off">{getTranslation(interfaceLanguage, 'speed_off')}</option>
             </select>
           </div>
         </div>
@@ -389,7 +416,7 @@ export default function SettingsPage() {
       {/* LANGUAGE SECTION */}
       <section className="flex flex-col gap-2">
         <span className="text-[11px] font-black uppercase tracking-widest text-[var(--foreground-muted)] px-1">
-          LANGUAGE
+          {getTranslation(interfaceLanguage, 'language_section')}
         </span>
 
         <div className="bg-[var(--surface)] border border-[var(--surface-border)] rounded-3xl divide-y divide-[var(--surface-border)] overflow-hidden shadow-sm">
@@ -398,18 +425,23 @@ export default function SettingsPage() {
               <div className="h-10 w-10 rounded-2xl bg-[var(--background)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground)]">
                 <Languages size={18} />
               </div>
-              <span className="text-sm font-bold text-[var(--foreground)]">Game Language</span>
+              <span className="text-sm font-bold text-[var(--foreground)]">{getTranslation(interfaceLanguage, 'game_language')}</span>
             </div>
             <select
               value={gameLanguage}
               onChange={(e) => {
-                useSettingsStore.setState({ gameLanguage: e.target.value });
-                toast.success(`Game language set to ${e.target.value}`);
+                const lang = e.target.value;
+                setGameLanguage(lang);
+                useGameStore.getState().resetGame();
+                toast.success(`Game language set to ${lang}`);
               }}
               className="bg-[var(--background)] text-[var(--foreground)] text-xs font-bold px-3 py-2 rounded-xl border border-[var(--surface-border)] focus:outline-none cursor-pointer"
             >
               <option value="English (US)">English (US)</option>
               <option value="English (UK)">English (UK)</option>
+              <option value="Español">Español</option>
+              <option value="Français">Français</option>
+              <option value="Deutsch">Deutsch</option>
             </select>
           </div>
 
@@ -418,13 +450,14 @@ export default function SettingsPage() {
               <div className="h-10 w-10 rounded-2xl bg-[var(--background)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground)]">
                 <Globe size={18} />
               </div>
-              <span className="text-sm font-bold text-[var(--foreground)]">Interface</span>
+              <span className="text-sm font-bold text-[var(--foreground)]">{getTranslation(interfaceLanguage, 'interface_language')}</span>
             </div>
             <select
               value={interfaceLanguage}
               onChange={(e) => {
-                useSettingsStore.setState({ interfaceLanguage: e.target.value });
-                toast.success(`Interface language set to ${e.target.value}`);
+                const lang = e.target.value;
+                setInterfaceLanguage(lang);
+                toast.success(`Interface language set to ${lang}`);
               }}
               className="bg-[var(--background)] text-[var(--foreground)] text-xs font-bold px-3 py-2 rounded-xl border border-[var(--surface-border)] focus:outline-none cursor-pointer"
             >
@@ -450,7 +483,7 @@ export default function SettingsPage() {
           }}
           className="w-full py-3.5 rounded-2xl bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold text-xs flex items-center justify-center gap-2 border border-red-500/20 transition-colors"
         >
-          <Trash2 size={16} /> Reset All Data
+          <Trash2 size={16} /> {getTranslation(interfaceLanguage, 'reset_data')}
         </button>
       </div>
     </main>
