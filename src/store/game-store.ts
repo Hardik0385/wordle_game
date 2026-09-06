@@ -155,6 +155,9 @@ interface GameState {
   nextEndlessStage: () => void;
   nextChaosWord: () => void;
   configureCustom: (length: number, maxGuesses: number, secretWord?: string) => void;
+  // Result modal visibility (not persisted — resets to false on every page load)
+  resultModalSeen: boolean;
+  dismissResultModal: () => void;
 }
 
 export const useGameStore = create<GameState>()(
@@ -171,6 +174,8 @@ export const useGameStore = create<GameState>()(
       hints: [],
       hintsRemaining: 2,
       savedGamesByMode: {},
+      // Result modal: starts unseen on every page load (not persisted)
+      resultModalSeen: false,
 
       // Timed
       timerSeconds: 60,
@@ -332,6 +337,8 @@ export const useGameStore = create<GameState>()(
           error: null,
           timerRunning: newStatus === 'playing' && isTimedChallenge,
           savedGamesByMode: updatedSavedGames,
+          // Show modal fresh for this result; dismissed = false
+          resultModalSeen: newStatus !== 'playing' ? false : get().resultModalSeen,
         });
       },
 
@@ -772,10 +779,17 @@ export const useGameStore = create<GameState>()(
           error: formatHintMessage(lang, chosenIndex + 1, hintLetter, remaining),
           savedGamesByMode: updatedSavedGames,
         });
-      }
+      },
+
+      dismissResultModal: () => set({ resultModalSeen: true }),
     }),
     {
       name: 'wordly-game-storage',
+      partialize: (state) => {
+        // Exclude resultModalSeen from storage — it must always start as false on page load
+        const { resultModalSeen, dismissResultModal, ...rest } = state as any;
+        return rest;
+      },
     }
   )
 );

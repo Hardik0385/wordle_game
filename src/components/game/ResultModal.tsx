@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useGameStore } from '@/store/game-store';
 import { usePlayerStore } from '@/store/player-store';
 import { useSettingsStore } from '@/store/settings-store';
@@ -22,20 +23,56 @@ export function ResultModal() {
     nextEndlessStage,
     nextChaosWord,
     timerSeconds,
-    timerMaxSeconds
+    timerMaxSeconds,
+    resultModalSeen,
+    dismissResultModal,
   } = useGameStore();
   const { stats } = usePlayerStore();
   const interfaceLanguage = useSettingsStore(state => state.interfaceLanguage);
 
-  if (status === 'playing') return null;
+  // Auto-dismiss modal when navigating away (component unmounts then remounts,
+  // but resultModalSeen is NOT persisted so it always resets to false on page reload).
+  // We dismiss on Escape key too.
+  useEffect(() => {
+    if (status === 'playing' || resultModalSeen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') dismissResultModal();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [status, resultModalSeen, dismissResultModal]);
+
+  // Don't render if game is ongoing OR if the user has already seen/dismissed the modal
+  if (status === 'playing' || resultModalSeen) return null;
 
   const won = status === 'won';
   const isSurvival = gameMode === 'survival';
   const isEndless = gameMode === 'endless';
   const isTimed = gameMode === 'timed';
   const isChaos = gameMode === 'chaos';
+  const isDaily = gameMode === 'daily';
 
-  const xpGained = won ? 100 + ((maxGuesses - guesses.length) * 20) : 10;
+  const xpGained = won ? (isDaily ? 150 : 100) + ((maxGuesses - guesses.length) * 20) : 10;
+
+  const handleNextWord = () => {
+    dismissResultModal();
+    resetGame();
+  };
+
+  const handleNextSurvival = () => {
+    dismissResultModal();
+    nextSurvivalWord();
+  };
+
+  const handleNextEndless = () => {
+    dismissResultModal();
+    nextEndlessStage();
+  };
+
+  const handleNextChaos = () => {
+    dismissResultModal();
+    nextChaosWord();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
@@ -92,6 +129,11 @@ export function ResultModal() {
                 <span className="text-[10px] text-[#8e95a5] uppercase font-bold tracking-wider">Score</span>
               </div>
             </>
+          ) : isDaily ? (
+            <div className="flex flex-col items-center">
+              <span className="text-xl font-black text-orange-400">🔥 {stats.dailyStreak}</span>
+              <span className="text-[10px] text-[#8e95a5] uppercase font-bold tracking-wider">Daily Streak</span>
+            </div>
           ) : (
             <div className="flex flex-col items-center">
               <span className="text-xl font-black text-white">{stats.currentStreak}</span>
@@ -105,28 +147,36 @@ export function ResultModal() {
           {/* Primary mode advancement button */}
           {isSurvival && (won || survivalLives > 0) ? (
             <button
-              onClick={() => nextSurvivalWord()}
+              onClick={handleNextSurvival}
               className="w-full py-3.5 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm transition-colors shadow-lg shadow-orange-500/20"
             >
               {won ? 'Next Word (Keep Streak 🔥)' : `Next Word (${survivalLives} Lives Left ❤️)`}
             </button>
           ) : isEndless && won ? (
             <button
-              onClick={() => nextEndlessStage()}
+              onClick={handleNextEndless}
               className="w-full py-3.5 rounded-2xl bg-[#2ec47d] hover:bg-[#28b371] text-black font-black text-sm transition-colors shadow-lg shadow-[#2ec47d]/20"
             >
               Advance to Stage {endlessStage + 1} 📈
             </button>
           ) : isChaos ? (
             <button
-              onClick={() => nextChaosWord()}
+              onClick={handleNextChaos}
               className="w-full py-3.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-sm transition-colors shadow-lg shadow-purple-600/20"
             >
               Next Chaos Challenge 🌪️
             </button>
+          ) : isDaily ? (
+            // Daily: no replay button — just dismiss to see the board/result
+            <button
+              onClick={dismissResultModal}
+              className="w-full py-3.5 rounded-2xl bg-[#2ec47d] hover:bg-[#28b371] text-black font-black text-sm transition-colors shadow-lg shadow-[#2ec47d]/20"
+            >
+              See Result Board
+            </button>
           ) : (
             <button
-              onClick={() => resetGame()}
+              onClick={handleNextWord}
               className="w-full py-3.5 rounded-2xl bg-[#2ec47d] hover:bg-[#28b371] text-black font-black text-sm transition-colors shadow-lg shadow-[#2ec47d]/20"
             >
               {won ? getTranslation(interfaceLanguage, 'next_word') : getTranslation(interfaceLanguage, 'try_again')}
@@ -136,12 +186,14 @@ export function ResultModal() {
           <div className="flex gap-2 w-full">
             <Link
               href="/modes"
+              onClick={dismissResultModal}
               className="flex-1 py-2.5 rounded-2xl bg-[var(--background)] hover:bg-[var(--surface-border)] font-bold text-xs text-[var(--foreground)] transition-colors flex items-center justify-center border border-[var(--surface-border)]"
             >
               {getTranslation(interfaceLanguage, 'other_modes')}
             </Link>
             <Link
               href="/stats"
+              onClick={dismissResultModal}
               className="flex-1 py-2.5 rounded-2xl bg-[var(--background)] hover:bg-[var(--surface-border)] font-bold text-xs text-[var(--foreground)] transition-colors flex items-center justify-center border border-[var(--surface-border)]"
             >
               {getTranslation(interfaceLanguage, 'stats')}
