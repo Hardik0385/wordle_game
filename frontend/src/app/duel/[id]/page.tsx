@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, use, useCallback } from 'react';
+import React, { useEffect, useState, use, useCallback, useRef } from 'react';
 import { doc, onSnapshot, updateDoc, deleteDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/context/AuthContext';
@@ -12,10 +12,13 @@ import {
   Trophy, 
   Loader2, 
   ArrowLeft, 
-  SlidersHorizontal,
-  Flame,
-  Delete,
-  CornerDownLeft
+  Flame, 
+  Delete, 
+  CornerDownLeft, 
+  Timer, 
+  Wind, 
+  Zap, 
+  AlertTriangle 
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -41,6 +44,10 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
   const [currentGuess, setCurrentGuess] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [statsSynced, setStatsSynced] = useState(false);
+
+  // Timed Rush countdown
+  const [timeLeft, setTimeLeft] = useState<number>(60);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!roomId) return;
@@ -70,10 +77,33 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
   const maxGuesses: number = Number(roomData?.maxGuesses) || 6;
   const isHardMode: boolean = Boolean(roomData?.isHardMode);
   const modeType: string = roomData?.modeType || 'classic';
+  const cursedLetter: string | undefined = roomData?.cursedLetter;
+  const isTimedMode = modeType === 'timed';
+  const isChaosMode = modeType === 'chaos';
 
+  const isTimeOut = isTimedMode && timeLeft <= 0;
   const gameOver = Boolean(
     roomData?.winnerId !== null && roomData?.winnerId !== undefined
-  ) || (myGuesses.length >= maxGuesses && opponentGuesses.length >= maxGuesses);
+  ) || (myGuesses.length >= maxGuesses && opponentGuesses.length >= maxGuesses) || isTimeOut;
+
+  // Countdown timer for Timed Rush mode
+  useEffect(() => {
+    if (!isTimedMode || gameOver || mySolved) return;
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isTimedMode, gameOver, mySolved]);
 
   const submitWord = useCallback(async () => {
     if (gameOver || mySolved || submitting) return;
@@ -84,6 +114,12 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
     }
 
     const upperGuess = currentGuess.toUpperCase();
+
+    // Chaos Mode rule check: Cursed letter
+    if (isChaosMode && cursedLetter && upperGuess.includes(cursedLetter)) {
+      toast.error(`🌪️ Chaos Rule: Cursed letter '${cursedLetter}' detected!`);
+      return;
+    }
 
     // Check validity against dictionary
     if (!isValidWord(upperGuess)) {
@@ -141,6 +177,8 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
     submitting,
     currentGuess,
     wordLength,
+    isChaosMode,
+    cursedLetter,
     isHardMode,
     myGuesses,
     targetWord,
@@ -165,7 +203,6 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
   // Global window key listener for typing anywhere on the page
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if typing in an input element
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
 
       if (e.key === 'Enter') {
@@ -195,11 +232,8 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
 
   const handleLeaveAndCleanup = async () => {
     try {
-      // Clean up temporary room from Firestore to avoid db bloat
       await deleteDoc(doc(db, 'rooms', roomId));
-    } catch (e) {
-      // Ignored if room already cleaned up by opponent
-    }
+    } catch (e) {}
     router.push('/duel');
   };
 
@@ -228,11 +262,9 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
     );
   }
 
-  // Row and Column helper arrays
   const rowsArray = Array.from({ length: maxGuesses }, (_, i) => i);
   const colsArray = Array.from({ length: wordLength }, (_, i) => i);
 
-  // Responsive tile size based on word length
   const tileSize =
     wordLength === 6
       ? 'w-9 h-9 sm:w-11 sm:h-11 text-sm sm:text-base'
@@ -241,7 +273,7 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
       : 'w-10 h-10 sm:w-12 sm:h-12 text-base sm:text-lg';
 
   return (
-    <main className="p-3 sm:p-6 max-w-4xl mx-auto flex flex-col gap-5 outline-none select-none">
+    <main className="p-3 sm:p-6 max-w-4xl mx-auto flex flex-col gap-4 outline-none select-none">
       {/* Header Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--surface-border)] pb-3">
         <button
@@ -258,6 +290,21 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
             <Swords size={13} />
             ROOM: {roomId}
           </div>
+
+          {modeType === 'timed' && (
+            <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-xs font-black animate-pulse">
+              <Timer size={13} />
+              TIMED RUSH: {timeLeft}s
+            </div>
+          )}
+
+          {modeType === 'chaos' && (
+            <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-purple-500/15 text-purple-400 text-xs font-black">
+              <Wind size={13} />
+              CHAOS: NO &apos;{cursedLetter}&apos;
+            </div>
+          )}
+
           <div className="px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-black">
             {wordLength} LETTERS
           </div>
@@ -273,8 +320,28 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
         </div>
       </div>
 
+      {/* Timed Mode Progress Countdown Bar */}
+      {isTimedMode && !gameOver && (
+        <div className="w-full bg-[var(--surface-border)]/50 h-2 rounded-full overflow-hidden">
+          <div
+            className={`h-full transition-all duration-1000 ${
+              timeLeft <= 15 ? 'bg-red-500 animate-pulse' : 'bg-amber-400'
+            }`}
+            style={{ width: `${(timeLeft / 60) * 100}%` }}
+          />
+        </div>
+      )}
+
+      {/* Chaos Mode Notice Banner */}
+      {isChaosMode && cursedLetter && (
+        <div className="p-2.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-center flex items-center justify-center gap-2 text-xs text-purple-400 font-bold">
+          <AlertTriangle size={15} />
+          <span>CHAOS RULE ACTIVE: Cursed letter &apos;{cursedLetter}&apos; cannot be used in any guess!</span>
+        </div>
+      )}
+
       {/* Winner / Finish Banner */}
-      {roomData.winnerId && (
+      {(roomData.winnerId || gameOver) && (
         <div
           className={`p-6 rounded-3xl text-center flex flex-col items-center gap-3 animate-in fade-in zoom-in-95 duration-200 ${
             roomData.winnerId === user?.uid
@@ -284,7 +351,13 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
         >
           <Trophy size={40} />
           <h2 className="text-2xl font-black">
-            {roomData.winnerId === user?.uid ? 'VICTORY! YOU WON!' : `${opponentName} WON!`}
+            {roomData.winnerId === user?.uid
+              ? 'VICTORY! YOU WON!'
+              : roomData.winnerId
+              ? `${opponentName} WON!`
+              : isTimeOut
+              ? "TIME'S UP! DRAW!"
+              : 'MATCH FINISHED!'}
           </h2>
           <span className="text-sm font-semibold opacity-90">
             The word was: <span className="font-black uppercase tracking-widest">{targetWord}</span>
@@ -420,15 +493,18 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
       </div>
 
       {/* On-Screen Virtual Keyboard */}
-      <div className="flex flex-col gap-1.5 w-full max-w-lg mx-auto mt-2 select-none">
+      <div className="flex flex-col gap-1.5 w-full max-w-lg mx-auto mt-1 select-none">
         {KEYBOARD_ROWS.map((row, rowIdx) => (
           <div key={rowIdx} className="flex justify-center gap-1 sm:gap-1.5 w-full">
             {row.map((key) => {
               const isSpecial = key === 'ENTER' || key === 'BACKSPACE';
+              const isCursed = isChaosMode && key === cursedLetter;
               const state = letterStates.get(key);
 
               let keyStyle = 'bg-[var(--surface-border)]/70 hover:bg-[var(--surface-border)] text-[var(--foreground)]';
-              if (state === 'correct') {
+              if (isCursed) {
+                keyStyle = 'bg-purple-900/60 border border-purple-500 text-purple-300 opacity-60';
+              } else if (state === 'correct') {
                 keyStyle = 'bg-[#2ec47d] text-white';
               } else if (state === 'present') {
                 keyStyle = 'bg-amber-500 text-white';
@@ -451,6 +527,8 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
                     <span className="flex items-center gap-1 font-bold">
                       ENTER <CornerDownLeft size={12} />
                     </span>
+                  ) : isCursed ? (
+                    <span className="line-through">{key}</span>
                   ) : (
                     key
                   )}
