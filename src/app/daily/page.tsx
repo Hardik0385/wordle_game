@@ -28,14 +28,13 @@ export default function DailyPage() {
   const alreadyCompleted = dailySaved && dailySaved.dailyDate === today && dailySaved.status !== 'playing';
   const wonToday = alreadyCompleted && dailySaved.status === 'won';
 
-  // Next refresh time: 5:30 AM IST next day
+  // Next refresh time: midnight UTC = 5:30 AM IST
+  // Use pure UTC arithmetic to avoid timezone double-counting bugs
   const now = new Date();
-  const istOffsetMs = (5 * 60 + 30) * 60 * 1000;
-  const nowIST = new Date(now.getTime() + istOffsetMs);
-  const nextRefreshIST = new Date(nowIST);
-  nextRefreshIST.setDate(nextRefreshIST.getDate() + 1);
-  nextRefreshIST.setHours(0, 0, 0, 0);
-  const msUntilRefresh = nextRefreshIST.getTime() - nowIST.getTime();
+  const nextMidnightUTC = new Date(now);
+  nextMidnightUTC.setUTCDate(nextMidnightUTC.getUTCDate() + 1);
+  nextMidnightUTC.setUTCHours(0, 0, 0, 0);
+  const msUntilRefresh = nextMidnightUTC.getTime() - now.getTime();
   const hoursLeft = Math.floor(msUntilRefresh / (1000 * 60 * 60));
   const minsLeft = Math.floor((msUntilRefresh % (1000 * 60 * 60)) / (1000 * 60));
 
