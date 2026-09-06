@@ -128,6 +128,13 @@ export const usePlayerStore = create<PlayerState>()(
 
         newStats.gamesPlayed += 1;
 
+        // Auto-sync stats to Firebase if user is signed in
+        if (typeof window !== 'undefined') {
+          import('@/lib/firebase/sync-stats').then(({ syncGameResultToFirebase }) => {
+            syncGameResultToFirebase(won, numGuesses);
+          }).catch(() => {});
+        }
+
         if (won) {
           newStats.gamesWon += 1;
           newStats.currentStreak += 1;

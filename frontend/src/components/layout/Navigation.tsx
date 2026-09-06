@@ -6,6 +6,7 @@ import { LayoutGrid, BarChart2, Calendar, Trophy, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils';
 import { useSettingsStore } from '@/store/settings-store';
 import { getTranslation } from '@/lib/translations';
+import { AuthButton } from './AuthButton';
 
 const navItems = [
   { key: 'play', href: '/modes', icon: LayoutGrid },
@@ -59,6 +60,9 @@ export function Navigation() {
               </Link>
             );
           })}
+        </div>
+        <div className="mt-auto pt-4 border-t border-[var(--surface-border)]">
+          <AuthButton />
         </div>
       </nav>
 

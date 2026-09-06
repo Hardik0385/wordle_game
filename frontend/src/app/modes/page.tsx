@@ -62,6 +62,14 @@ const MODES: { id: GameMode; name: string; description: string; icon: string; ta
     color: 'border-purple-500/30 hover:border-purple-500/60'
   },
   { 
+    id: 'duel' as any, 
+    name: '1V1 Multiplayer Duel', 
+    description: 'Real-time head-to-head battle! Race an online opponent on the same secret word.', 
+    icon: '⚔️',
+    tag: 'ONLINE 1V1',
+    color: 'border-amber-500/40 hover:border-amber-500/80'
+  },
+  { 
     id: 'custom', 
     name: 'Custom Game', 
     description: 'Configure 4, 5, or 6 letter words and customize max attempts to your liking.', 
@@ -75,8 +83,10 @@ export default function ModesPage() {
   const router = useRouter();
   const { setGameMode, gameMode, status, guesses, maxGuesses, savedGamesByMode } = useGameStore();
 
-  const handleSelectMode = (modeId: GameMode) => {
-    if (modeId === 'daily') {
+  const handleSelectMode = (modeId: any) => {
+    if (modeId === 'duel') {
+      router.push('/duel');
+    } else if (modeId === 'daily') {
       router.push('/daily');
     } else {
       if (modeId === gameMode && status === 'playing') {

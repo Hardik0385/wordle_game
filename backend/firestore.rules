@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users Collection (profiles, ELO ratings, stats)
+    match /users/{userId} {
+      // Allow anyone to view profiles (for public leaderboards and player cards)
+      allow read: if true;
+      // Only the authenticated account owner can write to their own profile
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Global Leaderboard Aggregates
+    match /leaderboard/{entry} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // 1v1 Multiplayer Game Rooms
+    match /rooms/{roomId} {
+      // Authenticated players can read room state
+      allow read: if request.auth != null;
+      // Any authenticated player can create a new game room
+      allow create: if request.auth != null;
+      // Only players in the match (or someone joining empty player2 slot) can update room state
+      allow update: if request.auth != null && (
+        resource.data.player1Id == request.auth.uid || 
+        resource.data.player2Id == request.auth.uid ||
+        resource.data.player2Id == null
+      );
+      // Delete only allowed by host
+      allow delete: if request.auth != null && resource.data.player1Id == request.auth.uid;
+    }
+  }
+}
