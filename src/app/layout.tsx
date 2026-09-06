@@ -14,9 +14,25 @@ export const metadata: Metadata = {
     template: "%s | WORDLY",
   },
   description: "Play classic Wordle, timed rush, chaos modifiers, survival challenges, and unlimited daily word puzzles with custom themes, multi-language support, and stats.",
+  manifest: "/manifest.json",
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: [
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/icon-192.png",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "WORDLY",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
   },
 };
 
