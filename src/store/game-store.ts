@@ -7,6 +7,18 @@ import { useSettingsStore } from './settings-store';
 import { sounds } from '../lib/sound';
 import { formatHintMessage, formatNoHintsLeft, formatAllRevealed } from '../lib/translations';
 
+/**
+ * Returns the current calendar date string in IST (UTC+5:30).
+ * The daily challenge refreshes at 5:30 AM IST (= 00:00 UTC).
+ */
+export function getDailyDateIST(): string {
+  const now = new Date();
+  // IST = UTC + 5 hours 30 minutes
+  const istOffset = 5 * 60 + 30; // minutes
+  const istMs = now.getTime() + istOffset * 60 * 1000;
+  return new Date(istMs).toISOString().split('T')[0];
+}
+
 export interface PositionHint {
   index: number;
   letter: string;
@@ -87,7 +99,7 @@ function extractModeState(state: GameState): ModeSavedState {
     endlessScore: state.endlessScore,
     chaosModifier: state.chaosModifier,
     customChallengeWord: state.customChallengeWord,
-    dailyDate: new Date().toISOString().split('T')[0],
+    dailyDate: getDailyDateIST(),
     savedAt: Date.now(),
   };
 }
@@ -284,6 +296,8 @@ export const useGameStore = create<GameState>()(
                 stats: { ...prev.stats, totalXP: prev.stats.totalXP + timeBonus }
               }));
             }
+          } else if (gameMode === 'daily') {
+            usePlayerStore.getState().recordDailyResult(true, getDailyDateIST(), newGuesses.length);
           } else {
             usePlayerStore.getState().recordGameResult(true, newGuesses.length);
           }
@@ -294,6 +308,8 @@ export const useGameStore = create<GameState>()(
             const remainingLives = survivalLives - 1;
             set({ survivalLives: Math.max(0, remainingLives) });
             usePlayerStore.getState().recordGameResult(false, newGuesses.length);
+          } else if (gameMode === 'daily') {
+            usePlayerStore.getState().recordDailyResult(false, getDailyDateIST(), newGuesses.length);
           } else {
             usePlayerStore.getState().recordGameResult(false, newGuesses.length);
           }
@@ -361,8 +377,39 @@ export const useGameStore = create<GameState>()(
         }
 
         // 2. Check if the target mode has an in-progress game to restore
-        const today = new Date().toISOString().split('T')[0];
+        const today = getDailyDateIST();
         const savedForNewMode = updatedSaved[mode];
+
+        // For daily mode: if today's game is already completed (won or lost), restore it as-is (read-only)
+        if (mode === 'daily' && savedForNewMode && savedForNewMode.dailyDate === today && savedForNewMode.status !== 'playing') {
+          set({
+            gameMode: mode,
+            targetWord: savedForNewMode.targetWord,
+            wordLength: savedForNewMode.wordLength,
+            guesses: savedForNewMode.guesses,
+            maxGuesses: savedForNewMode.maxGuesses,
+            currentGuess: '',
+            status: savedForNewMode.status,
+            error: null,
+            hints: savedForNewMode.hints,
+            hintsRemaining: savedForNewMode.hintsRemaining,
+            timerSeconds: savedForNewMode.timerSeconds,
+            timerMaxSeconds: savedForNewMode.timerMaxSeconds,
+            timerRunning: false,
+            elapsedSeconds: savedForNewMode.elapsedSeconds,
+            survivalLives: savedForNewMode.survivalLives,
+            survivalMaxLives: savedForNewMode.survivalMaxLives,
+            survivalStreak: savedForNewMode.survivalStreak,
+            survivalBest: savedForNewMode.survivalBest,
+            endlessStage: savedForNewMode.endlessStage,
+            endlessScore: savedForNewMode.endlessScore,
+            chaosModifier: savedForNewMode.chaosModifier,
+            customChallengeWord: savedForNewMode.customChallengeWord,
+            savedGamesByMode: updatedSaved,
+          });
+          return;
+        }
+
         const canRestore = savedForNewMode && 
           savedForNewMode.status === 'playing' && 
           !options?.customTarget &&
@@ -435,6 +482,33 @@ export const useGameStore = create<GameState>()(
           target = getRandomWord(length, currentLang);
         }
 
+        // Daily: record the initial daily state as saved so it can be locked once completed
+        if (mode === 'daily') {
+          updatedSaved['daily'] = {
+            targetWord: target,
+            wordLength: 5,
+            guesses: [],
+            maxGuesses: guesses,
+            currentGuess: '',
+            status: 'playing',
+            hints: [],
+            hintsRemaining: 2,
+            timerSeconds: 60,
+            timerMaxSeconds: 60,
+            elapsedSeconds: 0,
+            survivalLives: 3,
+            survivalMaxLives: 3,
+            survivalStreak: 0,
+            survivalBest: 0,
+            endlessStage: 1,
+            endlessScore: 0,
+            chaosModifier: null,
+            customChallengeWord: null,
+            dailyDate: today,
+            savedAt: Date.now(),
+          };
+        }
+
         set({
           gameMode: mode,
           wordLength: length,
@@ -458,6 +532,17 @@ export const useGameStore = create<GameState>()(
 
       resetGame: (newTarget, customMaxGuesses, customWordLength) => {
         const { gameMode, wordLength, maxGuesses, endlessStage, savedGamesByMode } = get();
+
+        // Daily mode: never allow reset — the challenge is one attempt per day
+        if (gameMode === 'daily') {
+          const today = getDailyDateIST();
+          const dailySaved = savedGamesByMode['daily'];
+          if (dailySaved && dailySaved.dailyDate === today && dailySaved.status !== 'playing') {
+            // Game already completed today — do nothing
+            return;
+          }
+        }
+
         const updatedSaved = { ...savedGamesByMode };
         delete updatedSaved[gameMode];
 
@@ -484,9 +569,6 @@ export const useGameStore = create<GameState>()(
         let target = '';
         if (newTarget) {
           target = newTarget.toUpperCase();
-        } else if (gameMode === 'daily') {
-          const today = new Date().toISOString().split('T')[0];
-          target = getDailyWord(5, today).toUpperCase();
         } else {
           target = getRandomWord(targetLen, currentLang);
         }

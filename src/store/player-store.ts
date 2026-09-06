@@ -11,6 +11,10 @@ export interface GameStats {
   totalXP: number;
   level: number;
   unlockedAchievements: string[];
+  // Daily-specific streak tracking
+  dailyStreak: number;
+  dailyBestStreak: number;
+  lastDailyCompletedDate: string | null; // IST date string YYYY-MM-DD
 }
 
 interface PlayerState {
@@ -20,6 +24,7 @@ interface PlayerState {
   
   // Actions
   recordGameResult: (won: boolean, numGuesses: number, durationSeconds?: number) => void;
+  recordDailyResult: (won: boolean, dateIST: string, numGuesses: number) => void;
   setName: (name: string) => void;
   setHasPromptedName: (hasPrompted: boolean) => void;
 }
@@ -34,6 +39,9 @@ const INITIAL_STATS: GameStats = {
   totalXP: 0,
   level: 1,
   unlockedAchievements: [],
+  dailyStreak: 0,
+  dailyBestStreak: 0,
+  lastDailyCompletedDate: null,
 };
 
 import { toast } from 'react-hot-toast';
@@ -47,6 +55,72 @@ export const usePlayerStore = create<PlayerState>()(
 
       setName: (name) => set({ name }),
       setHasPromptedName: (hasPromptedName) => set({ hasPromptedName }),
+      recordDailyResult: (won, dateIST, numGuesses) => {
+        const { stats } = get();
+        const newStats = { ...stats };
+
+        // Guard: only record once per day
+        if (newStats.lastDailyCompletedDate === dateIST) return;
+
+        newStats.gamesPlayed += 1;
+        newStats.lastDailyCompletedDate = dateIST;
+
+        if (won) {
+          newStats.gamesWon += 1;
+
+          // Daily streak: check if yesterday was also completed
+          // We just always increment here since the game-store blocks replaying
+          newStats.dailyStreak = (newStats.dailyStreak || 0) + 1;
+          newStats.dailyBestStreak = Math.max(newStats.dailyBestStreak || 0, newStats.dailyStreak);
+          
+          // Also update overall streak
+          newStats.currentStreak += 1;
+          newStats.bestStreak = Math.max(newStats.bestStreak, newStats.currentStreak);
+
+          if (newStats.guessesDistribution[numGuesses] !== undefined) {
+            newStats.guessesDistribution[numGuesses] += 1;
+          } else {
+            newStats.guessesDistribution[numGuesses] = 1;
+          }
+
+          const xpGained = 150 + ((6 - numGuesses) * 20); // Daily gives bonus XP
+          newStats.totalXP += xpGained;
+          newStats.level = Math.floor(Math.sqrt(newStats.totalXP / 100)) + 1;
+
+          const achievements = [
+            { id: 'first_win', name: 'First Win', reqGamesWon: 1 },
+            { id: 'on_fire', name: 'On Fire', reqStreak: 5 },
+            { id: 'unstoppable', name: 'Unstoppable', reqStreak: 20 },
+            { id: 'word_master', name: 'Word Master', reqGamesWon: 100 },
+            { id: 'daily_devotee', name: 'Daily Devotee', reqDailyStreak: 7 },
+          ] as any[];
+
+          if (!newStats.unlockedAchievements) newStats.unlockedAchievements = [];
+
+          achievements.forEach((ach: any) => {
+            if (!newStats.unlockedAchievements.includes(ach.id)) {
+              let unlocked = false;
+              if (ach.reqGamesWon && newStats.gamesWon >= ach.reqGamesWon) unlocked = true;
+              if (ach.reqStreak && newStats.bestStreak >= ach.reqStreak) unlocked = true;
+              if (ach.reqDailyStreak && newStats.dailyStreak >= ach.reqDailyStreak) unlocked = true;
+
+              if (unlocked) {
+                newStats.unlockedAchievements.push(ach.id);
+                setTimeout(() => {
+                  toast.success(`Achievement Unlocked: ${ach.name}! 🏆`, { duration: 4000 });
+                }, 1000);
+              }
+            }
+          });
+        } else {
+          // Lost daily: reset daily streak
+          newStats.dailyStreak = 0;
+          newStats.currentStreak = 0;
+          newStats.totalXP += 10;
+        }
+
+        set({ stats: newStats });
+      },
 
       recordGameResult: (won, numGuesses, durationSeconds) => {
         const { stats } = get();
@@ -112,15 +186,27 @@ export const usePlayerStore = create<PlayerState>()(
     }),
     {
       name: 'wordly-player-storage',
-      version: 2,
+      version: 3,
       migrate: (persistedState: any, version: number) => {
         if (version < 2) {
           const oldName = persistedState?.name;
           const isHardcodedDefault = oldName === 'Hardik';
-          return {
+          persistedState = {
             ...persistedState,
             name: isHardcodedDefault ? '' : (oldName || ''),
             hasPromptedName: !isHardcodedDefault && !!oldName,
+          };
+        }
+        if (version < 3) {
+          // Add daily streak fields to existing stats
+          persistedState = {
+            ...persistedState,
+            stats: {
+              ...persistedState.stats,
+              dailyStreak: persistedState.stats?.dailyStreak ?? 0,
+              dailyBestStreak: persistedState.stats?.dailyBestStreak ?? 0,
+              lastDailyCompletedDate: persistedState.stats?.lastDailyCompletedDate ?? null,
+            },
           };
         }
         return persistedState;
