@@ -7,9 +7,6 @@ import { useAuth } from '@/context/AuthContext';
 import { Lock, Sparkles, Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
-// Routes that require authentication to play
-const PROTECTED_PREFIXES = ['/play', '/daily', '/duel', '/modes'];
-
 export function AuthGateModal() {
   const pathname = usePathname();
   const router = useRouter();
@@ -20,10 +17,8 @@ export function AuthGateModal() {
     setMounted(true);
   }, []);
 
-  // Check if current route is protected
-  const isProtected = PROTECTED_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`) || pathname.startsWith(`${prefix}?`)
-  );
+  // All routes except the landing home page '/' require authentication
+  const isProtected = pathname !== '/';
 
   if (!isProtected || !mounted) return null;
 
@@ -65,10 +60,10 @@ export function AuthGateModal() {
           </div>
 
           <h2 className="text-2xl font-black text-[var(--foreground)] mb-2">
-            Sign In Required to Play
+            Sign In Required
           </h2>
           <p className="text-xs sm:text-sm text-[var(--foreground-muted)] mb-6 max-w-xs leading-relaxed">
-            Sign in with Google to play puzzles, participate in 1v1 duels, sync your stats, and rank on the global leaderboard.
+            Sign in with Google to access game modes, customize settings, track cloud stats, view awards, and compete in online 1v1 duels.
           </p>
 
           <button
