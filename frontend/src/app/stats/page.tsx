@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import { usePlayerStore } from '@/store/player-store';
 import { useAuth } from '@/context/AuthContext';
 import { OnlineLeaderboard } from '@/components/player/OnlineLeaderboard';
-import { Trophy, BarChart3, CloudUpload } from 'lucide-react';
+import { Trophy, BarChart3, Cloud } from 'lucide-react';
 
 export default function StatsPage() {
   const { name, stats } = usePlayerStore();
-  const { user, syncLocalStats } = useAuth();
+  const { user, profile } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<'personal' | 'global'>('personal');
 
@@ -30,17 +30,15 @@ export default function StatsPage() {
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-extrabold mb-1">Leaderboards & Stats</h1>
             {user && (
-              <button
-                onClick={syncLocalStats}
-                title="Sync local games & streak to Firebase"
-                className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-[#2ec47d]/40 text-[#2ec47d] hover:bg-[#2ec47d]/10 text-xs font-bold transition-colors cursor-pointer"
-              >
-                <CloudUpload size={13} />
-                Sync to Cloud
-              </button>
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#2ec47d]/15 text-[#2ec47d] text-xs font-black">
+                <Cloud size={13} />
+                Cloud Synced
+              </span>
             )}
           </div>
-          <p className="text-[var(--foreground-muted)] text-sm">Track your progress and compete with global players</p>
+          <p className="text-[var(--foreground-muted)] text-sm">
+            {user ? `Account stats for ${profile?.displayName || user.displayName || 'Player'}` : 'Sign in to sync your stats to your account'}
+          </p>
         </div>
 
         {/* Tab Selector */}

@@ -27,6 +27,8 @@ interface PlayerState {
   recordDailyResult: (won: boolean, dateIST: string, numGuesses: number) => void;
   setName: (name: string) => void;
   setHasPromptedName: (hasPrompted: boolean) => void;
+  loadCloudStats: (cloudStats: Partial<GameStats>, name?: string) => void;
+  resetToGuest: () => void;
 }
 
 const INITIAL_STATS: GameStats = {
@@ -55,6 +57,22 @@ export const usePlayerStore = create<PlayerState>()(
 
       setName: (name) => set({ name }),
       setHasPromptedName: (hasPromptedName) => set({ hasPromptedName }),
+      loadCloudStats: (cloudStats, name) => {
+        set((state) => ({
+          name: name !== undefined ? name : state.name,
+          stats: {
+            ...INITIAL_STATS,
+            ...cloudStats,
+            guessesDistribution: {
+              ...INITIAL_STATS.guessesDistribution,
+              ...(cloudStats.guessesDistribution || {})
+            }
+          }
+        }));
+      },
+      resetToGuest: () => {
+        set({ name: '', stats: INITIAL_STATS, hasPromptedName: false });
+      },
       recordDailyResult: (won, dateIST, numGuesses) => {
         const { stats } = get();
         const newStats = { ...stats };
@@ -120,6 +138,12 @@ export const usePlayerStore = create<PlayerState>()(
         }
 
         set({ stats: newStats });
+
+        if (typeof window !== 'undefined') {
+          import('@/lib/firebase/sync-stats').then(({ syncGameResultToFirebase }) => {
+            syncGameResultToFirebase(won, numGuesses, newStats);
+          }).catch(() => {});
+        }
       },
 
       recordGameResult: (won, numGuesses, durationSeconds) => {
@@ -127,13 +151,6 @@ export const usePlayerStore = create<PlayerState>()(
         const newStats = { ...stats };
 
         newStats.gamesPlayed += 1;
-
-        // Auto-sync stats to Firebase if user is signed in
-        if (typeof window !== 'undefined') {
-          import('@/lib/firebase/sync-stats').then(({ syncGameResultToFirebase }) => {
-            syncGameResultToFirebase(won, numGuesses);
-          }).catch(() => {});
-        }
 
         if (won) {
           newStats.gamesWon += 1;
@@ -189,6 +206,12 @@ export const usePlayerStore = create<PlayerState>()(
         }
 
         set({ stats: newStats });
+
+        if (typeof window !== 'undefined') {
+          import('@/lib/firebase/sync-stats').then(({ syncGameResultToFirebase }) => {
+            syncGameResultToFirebase(won, numGuesses, newStats);
+          }).catch(() => {});
+        }
       }
     }),
     {

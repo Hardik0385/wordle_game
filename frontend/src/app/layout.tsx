@@ -5,6 +5,7 @@ import { Navigation } from "@/components/layout/Navigation";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { NamePromptModal } from "@/components/player/NamePromptModal";
 import { AuthProvider } from "@/context/AuthContext";
+import { AuthGateModal } from "@/components/auth/AuthGateModal";
 import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -52,6 +53,7 @@ export default function RootLayout({
       <body className={`${inter.className} flex flex-col md:flex-row min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300`}>
         <ThemeProvider>
           <AuthProvider>
+            <AuthGateModal />
             <NamePromptModal />
             <Navigation />
             <div className="flex-1 pb-20 md:pb-0 overflow-y-auto">

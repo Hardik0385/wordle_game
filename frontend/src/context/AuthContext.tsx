@@ -9,14 +9,16 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { auth, db, googleProvider } from '@/lib/firebase/config';
-import { usePlayerStore } from '@/store/player-store';
+import { usePlayerStore, GameStats } from '@/store/player-store';
+import { getDefaultAvatar } from '@/lib/avatars';
 import toast from 'react-hot-toast';
 
 export interface UserProfile {
   uid: string;
-  displayName: string | null;
+  displayName: string;
   email: string | null;
-  photoURL: string | null;
+  photoURL: string;
+  bio?: string;
   rating: number;
   gamesPlayed: number;
   gamesWon: number;
@@ -28,7 +30,7 @@ interface AuthContextType {
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
-  syncLocalStats: () => Promise<void>;
+  updateUserProfile: (displayName: string, bio: string, photoURL: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -37,7 +39,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signInWithGoogle: async () => {},
   logout: async () => {},
-  syncLocalStats: async () => {},
+  updateUserProfile: async () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -45,44 +47,84 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Helper to sync local offline stats into Firestore profile
-  const syncWithFirestore = async (currentUser: User) => {
+  // Fetch or initialize user profile strictly from Firestore (single source of truth)
+  const loadAccountFromFirestore = async (currentUser: User) => {
     try {
-      const localStats = usePlayerStore.getState().stats;
       const userDocRef = doc(db, 'users', currentUser.uid);
       const docSnap = await getDoc(userDocRef);
-      const existingData = docSnap.exists() ? docSnap.data() : {};
 
-      // Merge: take whichever is higher between cloud and local
-      const gamesPlayed = Math.max(existingData.gamesPlayed ?? 0, localStats.gamesPlayed ?? 0);
-      const gamesWon = Math.max(existingData.gamesWon ?? 0, localStats.gamesWon ?? 0);
-      
-      const calculatedRating = Math.max(1000, 1200 + (gamesWon * 25) - ((gamesPlayed - gamesWon) * 10));
-      const rating = existingData.rating ?? calculatedRating;
+      const defaultAvatar = currentUser.photoURL || getDefaultAvatar(currentUser.uid);
+      const defaultName = currentUser.displayName || 'Player';
 
-      const mergedProfile: UserProfile = {
-        uid: currentUser.uid,
-        displayName: currentUser.displayName,
-        email: currentUser.email,
-        photoURL: currentUser.photoURL,
-        rating,
-        gamesPlayed,
-        gamesWon,
-      };
+      if (!docSnap.exists()) {
+        // Brand new account: initialize clean cloud profile & stats
+        const newProfile: UserProfile = {
+          uid: currentUser.uid,
+          displayName: defaultName,
+          email: currentUser.email,
+          photoURL: defaultAvatar,
+          bio: 'Wordle Enthusiast',
+          rating: 1200,
+          gamesPlayed: 0,
+          gamesWon: 0,
+        };
 
-      await setDoc(
-        userDocRef, 
-        {
-          ...mergedProfile,
+        await setDoc(userDocRef, {
+          ...newProfile,
+          createdAt: serverTimestamp(),
           lastLoginAt: serverTimestamp(),
-          ...(!docSnap.exists() ? { createdAt: serverTimestamp() } : {}),
-        }, 
-        { merge: true }
-      );
+        });
 
-      setProfile(mergedProfile);
+        setProfile(newProfile);
+        // Load clean zero stats into player store
+        usePlayerStore.getState().loadCloudStats({
+          gamesPlayed: 0,
+          gamesWon: 0,
+          currentStreak: 0,
+          bestStreak: 0,
+          guessesDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
+        }, newProfile.displayName);
+      } else {
+        // Existing account: strictly load account data from Firestore
+        const data = docSnap.data();
+        const existingProfile: UserProfile = {
+          uid: currentUser.uid,
+          displayName: data.displayName || defaultName,
+          email: currentUser.email,
+          photoURL: data.photoURL || defaultAvatar,
+          bio: data.bio || 'Wordle Enthusiast',
+          rating: data.rating ?? 1200,
+          gamesPlayed: data.gamesPlayed ?? 0,
+          gamesWon: data.gamesWon ?? 0,
+        };
+
+        // Update last login
+        await setDoc(userDocRef, { 
+          lastLoginAt: serverTimestamp(),
+          // Ensure photoURL exists on doc
+          ...(!data.photoURL ? { photoURL: defaultAvatar } : {})
+        }, { merge: true });
+
+        setProfile(existingProfile);
+
+        // Load Firestore stats directly into the app state
+        const cloudStats = data.stats || {};
+        usePlayerStore.getState().loadCloudStats({
+          gamesPlayed: data.gamesPlayed ?? 0,
+          gamesWon: data.gamesWon ?? 0,
+          currentStreak: cloudStats.currentStreak ?? 0,
+          bestStreak: cloudStats.bestStreak ?? 0,
+          guessesDistribution: cloudStats.guessesDistribution || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
+          fastestSolve: cloudStats.fastestSolve ?? null,
+          totalXP: cloudStats.totalXP ?? (data.gamesWon ? data.gamesWon * 100 : 0),
+          level: cloudStats.level ?? 1,
+          unlockedAchievements: cloudStats.unlockedAchievements || [],
+          dailyStreak: cloudStats.dailyStreak ?? 0,
+          dailyBestStreak: cloudStats.dailyBestStreak ?? 0,
+        }, existingProfile.displayName);
+      }
     } catch (error) {
-      console.error('Error fetching/syncing user profile:', error);
+      console.error('Error loading account from Firestore:', error);
     }
   };
 
@@ -90,9 +132,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        await syncWithFirestore(currentUser);
+        await loadAccountFromFirestore(currentUser);
       } else {
         setProfile(null);
+        // User logged out: wipe local stats so guest stats don't linger
+        usePlayerStore.getState().resetToGuest();
       }
       setLoading(false);
     });
@@ -100,10 +144,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const syncLocalStats = async () => {
-    if (user) {
-      await syncWithFirestore(user);
-      toast.success('Synced your local stats to Cloud!');
+  const updateUserProfile = async (displayName: string, bio: string, photoURL: string) => {
+    if (!user) return;
+    try {
+      const userDocRef = doc(db, 'users', user.uid);
+      await setDoc(userDocRef, {
+        displayName: displayName.trim() || 'Player',
+        bio: bio.trim(),
+        photoURL,
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
+
+      setProfile((prev) => prev ? {
+        ...prev,
+        displayName: displayName.trim() || 'Player',
+        bio: bio.trim(),
+        photoURL,
+      } : null);
+
+      usePlayerStore.getState().setName(displayName.trim() || 'Player');
+      toast.success('Profile updated successfully! ✨');
+    } catch (error: any) {
+      console.error('Failed to update profile:', error);
+      toast.error(error.message || 'Failed to update profile');
+      throw error;
     }
   };
 
@@ -112,9 +176,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(true);
       const result = await signInWithPopup(auth, googleProvider);
       if (result.user) {
-        await syncWithFirestore(result.user);
+        await loadAccountFromFirestore(result.user);
       }
-      toast.success('Signed in with Google & stats synced!');
+      toast.success('Welcome back!');
     } catch (error: any) {
       console.error('Google sign in error:', error);
       toast.error(error.message || 'Failed to sign in with Google');
@@ -126,7 +190,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       await firebaseSignOut(auth);
-      toast.success('Signed out successfully');
+      usePlayerStore.getState().resetToGuest();
+      toast.success('Signed out');
     } catch (error: any) {
       console.error('Sign out error:', error);
       toast.error('Failed to sign out');
@@ -134,7 +199,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signInWithGoogle, logout, syncLocalStats }}>
+    <AuthContext.Provider value={{ user, profile, loading, signInWithGoogle, logout, updateUserProfile }}>
       {children}
     </AuthContext.Provider>
   );

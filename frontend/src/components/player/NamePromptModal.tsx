@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { usePlayerStore } from '@/store/player-store';
+import { useAuth } from '@/context/AuthContext';
 import { toast } from 'react-hot-toast';
 import { Sparkles, User, ArrowRight } from 'lucide-react';
 
 export function NamePromptModal() {
   const { name, hasPromptedName, setName, setHasPromptedName } = usePlayerStore();
+  const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [inputName, setInputName] = useState('');
 
@@ -14,8 +16,8 @@ export function NamePromptModal() {
     setMounted(true);
   }, []);
 
-  // Only show if mounted, user has not been prompted yet, and name is not already established
-  if (!mounted || hasPromptedName) {
+  // Suppress if not mounted, user is already logged in (account has profile), or already prompted
+  if (!mounted || hasPromptedName || !!user) {
     return null;
   }
 

@@ -1,7 +1,8 @@
 import { doc, setDoc, increment, serverTimestamp } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase/config';
+import { GameStats } from '@/store/player-store';
 
-export async function syncGameResultToFirebase(won: boolean, attempts: number) {
+export async function syncGameResultToFirebase(won: boolean, attempts: number, fullStats?: GameStats) {
   const currentUser = auth.currentUser;
   if (!currentUser) return;
 
@@ -10,16 +11,18 @@ export async function syncGameResultToFirebase(won: boolean, attempts: number) {
     // Calculate ELO change: +25 for win, -10 for loss (minimum 100)
     const eloChange = won ? 25 : -10;
 
-    await setDoc(
-      userDocRef,
-      {
-        gamesPlayed: increment(1),
-        gamesWon: increment(won ? 1 : 0),
-        rating: increment(eloChange),
-        lastPlayedAt: serverTimestamp(),
-      },
-      { merge: true }
-    );
+    const updateData: any = {
+      gamesPlayed: increment(1),
+      gamesWon: increment(won ? 1 : 0),
+      rating: increment(eloChange),
+      lastPlayedAt: serverTimestamp(),
+    };
+
+    if (fullStats) {
+      updateData.stats = fullStats;
+    }
+
+    await setDoc(userDocRef, updateData, { merge: true });
   } catch (error) {
     console.error('Error syncing game result to Firebase:', error);
   }

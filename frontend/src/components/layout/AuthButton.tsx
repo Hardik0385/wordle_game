@@ -1,12 +1,14 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { LogIn, LogOut, Loader2, Trophy } from 'lucide-react';
-import Image from 'next/image';
+import { LogOut, Loader2, Trophy, Edit3 } from 'lucide-react';
+import { EditProfileModal } from '@/components/player/EditProfileModal';
+import { getDefaultAvatar } from '@/lib/avatars';
 
 export function AuthButton() {
   const { user, profile, loading, signInWithGoogle, logout } = useAuth();
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   if (loading) {
     return (
@@ -17,39 +19,58 @@ export function AuthButton() {
   }
 
   if (user) {
+    const avatarSrc = profile?.photoURL || user.photoURL || getDefaultAvatar(user.uid);
+    const displayName = profile?.displayName || user.displayName || 'Player';
+
     return (
-      <div className="flex flex-col gap-2 p-3 rounded-2xl border border-[var(--surface-border)] bg-[var(--background)]/50">
-        <div className="flex items-center gap-3">
-          {user.photoURL ? (
-            <img
-              src={user.photoURL}
-              alt={user.displayName || 'User'}
-              className="w-10 h-10 rounded-full border border-[#2ec47d]/40 object-cover"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#2ec47d] to-[#10b981] flex items-center justify-center font-bold text-white shadow-sm">
-              {user.displayName ? user.displayName[0].toUpperCase() : 'U'}
+      <>
+        <div className="flex flex-col gap-2.5 p-3 rounded-2xl border border-[var(--surface-border)] bg-[var(--background)]/50">
+          <div 
+            onClick={() => setIsEditOpen(true)}
+            className="flex items-center gap-3 cursor-pointer group hover:opacity-90 transition-opacity"
+            title="Click to edit profile & avatar"
+          >
+            <div className="relative">
+              <img
+                src={avatarSrc}
+                alt={displayName}
+                className="w-10 h-10 rounded-full border-2 border-[#2ec47d]/60 object-cover bg-[var(--surface)]"
+              />
+              <div className="absolute -bottom-1 -right-1 p-0.5 rounded-full bg-[#2ec47d] text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                <Edit3 size={10} />
+              </div>
             </div>
-          )}
-          <div className="flex flex-col min-w-0 flex-1">
-            <span className="font-bold text-sm text-[var(--foreground)] truncate">
-              {user.displayName || 'Player'}
-            </span>
-            <div className="flex items-center gap-1.5 text-xs text-[#2ec47d] font-semibold">
-              <Trophy size={12} />
-              <span>{profile?.rating ?? 1200} ELO</span>
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="font-bold text-sm text-[var(--foreground)] truncate group-hover:text-[#2ec47d] transition-colors">
+                {displayName}
+              </span>
+              <div className="flex items-center gap-1.5 text-xs text-[#2ec47d] font-semibold">
+                <Trophy size={12} />
+                <span>{profile?.rating ?? 1200} ELO</span>
+              </div>
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 pt-1 border-t border-[var(--surface-border)]/50">
+            <button
+              onClick={() => setIsEditOpen(true)}
+              className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl bg-[var(--surface-border)]/40 hover:bg-[var(--surface-border)] font-bold text-xs transition-colors cursor-pointer"
+            >
+              <Edit3 size={12} />
+              Edit
+            </button>
+            <button
+              onClick={logout}
+              className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500/10 font-bold text-xs transition-colors cursor-pointer"
+            >
+              <LogOut size={12} />
+              Sign Out
+            </button>
           </div>
         </div>
 
-        <button
-          onClick={logout}
-          className="mt-1 flex items-center justify-center gap-2 w-full py-2 px-3 rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500/10 font-bold text-xs transition-colors"
-        >
-          <LogOut size={14} />
-          Sign Out
-        </button>
-      </div>
+        <EditProfileModal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} />
+      </>
     );
   }
 
