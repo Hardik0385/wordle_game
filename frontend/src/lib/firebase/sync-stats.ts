@@ -2,7 +2,12 @@ import { doc, setDoc, increment, serverTimestamp } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase/config';
 import { GameStats } from '@/store/player-store';
 
-export async function syncGameResultToFirebase(won: boolean, attempts: number, fullStats?: GameStats) {
+export async function syncGameResultToFirebase(
+  won: boolean,
+  attempts: number,
+  fullStats?: GameStats,
+  isDuel: boolean = false
+) {
   const currentUser = auth.currentUser;
   if (!currentUser) return;
 
@@ -17,6 +22,11 @@ export async function syncGameResultToFirebase(won: boolean, attempts: number, f
       rating: increment(eloChange),
       lastPlayedAt: serverTimestamp(),
     };
+
+    if (isDuel) {
+      updateData.duelWins = increment(won ? 1 : 0);
+      updateData.duelLosses = increment(won ? 0 : 1);
+    }
 
     if (fullStats) {
       updateData.stats = fullStats;

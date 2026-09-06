@@ -80,6 +80,13 @@ export default function StatsPage() {
             <StatCard title="Best Streak" value={stats.bestStreak} />
           </div>
 
+          {/* 1v1 Online Duel Stats (Saved in Cloud Profile) */}
+          <div className="grid grid-cols-3 gap-4">
+            <StatCard title="Rating (ELO)" value={profile?.rating ?? 1200} highlight />
+            <StatCard title="1v1 Duel Wins" value={(profile as any)?.duelWins ?? 0} />
+            <StatCard title="1v1 Duel Losses" value={(profile as any)?.duelLosses ?? 0} />
+          </div>
+
           <div className="grid md:grid-cols-2 gap-8 mt-4">
             {/* Guess Distribution */}
             <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-2xl">
@@ -128,11 +135,15 @@ export default function StatsPage() {
   );
 }
 
-function StatCard({ title, value }: { title: string, value: number | string }) {
+function StatCard({ title, value, highlight }: { title: string; value: number | string; highlight?: boolean }) {
   return (
-    <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center text-center">
-      <div className="text-3xl font-extrabold mb-1">{value}</div>
-      <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold">{title}</div>
+    <div className={`p-4 rounded-2xl flex flex-col items-center justify-center text-center border transition-all ${
+      highlight
+        ? 'bg-[#2ec47d]/10 border-[#2ec47d]/30 text-[#2ec47d]'
+        : 'bg-gray-50 dark:bg-gray-800/60 border-transparent text-[var(--foreground)]'
+    }`}>
+      <div className={`text-3xl font-extrabold mb-1 ${highlight ? 'text-[#2ec47d]' : ''}`}>{value}</div>
+      <div className="text-xs text-[var(--foreground-muted)] uppercase tracking-wider font-semibold">{title}</div>
     </div>
   );
 }

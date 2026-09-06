@@ -6,6 +6,7 @@ import {
   doc, 
   setDoc, 
   getDoc, 
+  deleteDoc,
   onSnapshot, 
   updateDoc, 
   serverTimestamp 
@@ -81,6 +82,17 @@ export default function DuelLobbyPage() {
       toast.error(err.message || 'Failed to create room');
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleCancelRoom = async () => {
+    if (createdRoomId) {
+      try {
+        await deleteDoc(doc(db, 'rooms', createdRoomId));
+      } catch (e) {}
+      setCreatedRoomId(null);
+      setWaitingOpponent(false);
+      toast.success('Room closed & cleaned');
     }
   };
 
@@ -204,6 +216,13 @@ export default function DuelLobbyPage() {
                   <Loader2 size={14} className="animate-spin text-[#2ec47d]" />
                   <span>Waiting for opponent to join...</span>
                 </div>
+                <button
+                  type="button"
+                  onClick={handleCancelRoom}
+                  className="mt-2 text-xs font-bold text-red-400 hover:text-red-300 underline cursor-pointer transition-colors"
+                >
+                  Cancel & Delete Room
+                </button>
               </div>
             ) : (
               <button

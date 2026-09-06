@@ -28,8 +28,11 @@ service cloud.firestore {
         resource.data.player2Id == request.auth.uid ||
         resource.data.player2Id == null
       );
-      // Delete only allowed by host
-      allow delete: if request.auth != null && resource.data.player1Id == request.auth.uid;
+      // Delete allowed by either player in the room when finished or leaving
+      allow delete: if request.auth != null && (
+        resource.data.player1Id == request.auth.uid || 
+        resource.data.player2Id == request.auth.uid
+      );
     }
   }
 }

@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useEffect, useState, use } from 'react';
-import { doc, onSnapshot, updateDoc, arrayUnion } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, deleteDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/context/AuthContext';
-import { Swords, Trophy, Loader2, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
+import { syncGameResultToFirebase } from '@/lib/firebase/sync-stats';
+import { Swords, Trophy, Loader2, CheckCircle2, XCircle, ArrowLeft, Trash2, Home } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 interface DuelMatchPageProps {
@@ -13,6 +15,7 @@ interface DuelMatchPageProps {
 }
 
 export default function DuelMatchPage({ params }: DuelMatchPageProps) {
+  const router = useRouter();
   const resolvedParams = use(params);
   const roomId = resolvedParams.id;
   const { user } = useAuth();
@@ -20,6 +23,7 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
   const [loading, setLoading] = useState(true);
   const [currentGuess, setCurrentGuess] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [statsSynced, setStatsSynced] = useState(false);
 
   useEffect(() => {
     if (!roomId) return;
@@ -110,6 +114,26 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
     }
   };
 
+  // Auto sync match result to player stats in Firestore when game concludes
+  useEffect(() => {
+    if (!roomData || statsSynced || !user) return;
+    if (roomData.winnerId !== null || gameOver) {
+      const didWin = roomData.winnerId === user.uid;
+      syncGameResultToFirebase(didWin, myGuesses.length, undefined, true);
+      setStatsSynced(true);
+    }
+  }, [roomData?.winnerId, gameOver, user, statsSynced, myGuesses.length]);
+
+  const handleLeaveAndCleanup = async () => {
+    try {
+      // Clean up temporary room from Firestore to avoid db bloat
+      await deleteDoc(doc(db, 'rooms', roomId));
+    } catch (e) {
+      // Ignored if room already cleaned up by opponent
+    }
+    router.push('/duel');
+  };
+
   return (
     <main
       tabIndex={0}
@@ -118,13 +142,13 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
     >
       {/* Header Bar */}
       <div className="flex items-center justify-between border-b border-[var(--surface-border)] pb-4">
-        <Link
-          href="/duel"
-          className="flex items-center gap-2 text-xs font-bold text-[var(--foreground-muted)] hover:text-[var(--foreground)]"
+        <button
+          onClick={handleLeaveAndCleanup}
+          className="flex items-center gap-2 text-xs font-bold text-[var(--foreground-muted)] hover:text-[var(--foreground)] cursor-pointer transition-colors"
         >
           <ArrowLeft size={16} />
-          Leave Duel
-        </Link>
+          Leave Match & Clean Room
+        </button>
         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#2ec47d]/10 text-[#2ec47d] text-xs font-black">
           <Swords size={14} />
           ROOM: {roomId}
@@ -133,7 +157,7 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
 
       {/* Winner Banner */}
       {roomData.winnerId && (
-        <div className={`p-6 rounded-3xl text-center flex flex-col items-center gap-2 ${
+        <div className={`p-6 rounded-3xl text-center flex flex-col items-center gap-3 ${
           roomData.winnerId === user?.uid 
             ? 'bg-[#2ec47d]/15 border-2 border-[#2ec47d] text-[#2ec47d]' 
             : 'bg-red-500/15 border-2 border-red-500 text-red-500'
@@ -145,6 +169,21 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
           <span className="text-sm font-semibold opacity-90">
             The word was: <span className="font-black uppercase tracking-widest">{targetWord}</span>
           </span>
+          <div className="flex items-center gap-3 mt-2">
+            <button
+              onClick={handleLeaveAndCleanup}
+              className="py-2 px-5 rounded-2xl bg-white text-black font-extrabold text-xs shadow hover:bg-white/90 transition-all cursor-pointer"
+            >
+              Back to Duel Lobby (Cleans Room)
+            </button>
+            <Link
+              href="/stats"
+              onClick={handleLeaveAndCleanup}
+              className="py-2 px-5 rounded-2xl bg-black/20 hover:bg-black/30 font-extrabold text-xs transition-all"
+            >
+              View Updated Stats & ELO
+            </Link>
+          </div>
         </div>
       )}
 
