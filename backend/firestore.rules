@@ -6,8 +6,8 @@ service cloud.firestore {
     match /users/{userId} {
       // Allow anyone to view profiles (for public leaderboards and player cards)
       allow read: if true;
-      // Only the authenticated account owner can write to their own profile
-      allow create, update: if request.auth != null && request.auth.uid == userId;
+      // Only the authenticated account owner can write to or delete their own profile
+      allow create, update, delete: if request.auth != null && request.auth.uid == userId;
     }
 
     // Global Leaderboard Aggregates

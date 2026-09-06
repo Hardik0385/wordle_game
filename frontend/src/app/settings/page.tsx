@@ -7,6 +7,7 @@ import { usePlayerStore } from '@/store/player-store';
 import { useGameStore } from '@/store/game-store';
 import { useAuth } from '@/context/AuthContext';
 import { EditProfileModal } from '@/components/player/EditProfileModal';
+import { AccountActionModal } from '@/components/player/AccountActionModal';
 import { getDefaultAvatar } from '@/lib/avatars';
 import { sounds } from '@/lib/sound';
 import { 
@@ -26,12 +27,18 @@ import {
   Trash2,
   Edit3,
   Trophy,
-  Cloud
+  Cloud,
+  RefreshCw,
+  AlertTriangle
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getTranslation } from '@/lib/translations';
 
 export default function SettingsPage() {
+  const [actionModal, setActionModal] = useState<{ isOpen: boolean; type: 'reset' | 'delete' }>({
+    isOpen: false,
+    type: 'reset',
+  });
   const { 
     hardMode, 
     toggleHardMode, 
@@ -518,22 +525,99 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      {/* Danger Zone */}
-      <div className="pt-2">
-        <button 
-          onClick={() => {
-            if (confirm("Reset all local game and player data?")) {
-              localStorage.removeItem('wordly-player-storage');
-              localStorage.removeItem('wordly-game-storage');
-              localStorage.removeItem('wordly-settings-storage');
-              window.location.reload();
-            }
-          }}
-          className="w-full py-3.5 rounded-2xl bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold text-xs flex items-center justify-center gap-2 border border-red-500/20 transition-colors"
-        >
-          <Trash2 size={16} /> {getTranslation(interfaceLanguage, 'reset_data')}
-        </button>
-      </div>
+      {/* Danger Zone & Account Management */}
+      <section className="flex flex-col gap-2 pt-2">
+        <span className="text-[11px] font-black uppercase tracking-widest text-red-400 px-1 flex items-center gap-1.5">
+          <AlertTriangle size={13} />
+          Danger Zone
+        </span>
+
+        <div className="bg-[var(--surface)] border border-red-500/20 rounded-3xl divide-y divide-[var(--surface-border)] overflow-hidden shadow-sm">
+          {/* Reset Account Statistics */}
+          {user && (
+            <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="h-10 w-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                  <RefreshCw size={18} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-[var(--foreground)]">Reset Account Statistics</span>
+                  <span className="text-xs text-[var(--foreground-muted)] max-w-sm">
+                    Reset your wins, streaks, guesses, and rating back to 1200 ELO. Your username and custom avatar are kept.
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActionModal({ isOpen: true, type: 'reset' })}
+                className="py-2 px-4 rounded-xl border border-amber-500/30 text-amber-400 hover:bg-amber-500/10 text-xs font-extrabold transition-colors cursor-pointer self-start sm:self-auto shrink-0"
+              >
+                Reset Stats
+              </button>
+            </div>
+          )}
+
+          {/* Delete Account Permanently */}
+          {user && (
+            <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="h-10 w-10 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center shrink-0">
+                  <Trash2 size={18} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-red-400">Permanently Delete Account</span>
+                  <span className="text-xs text-[var(--foreground-muted)] max-w-sm">
+                    Irreversibly delete your account profile, custom avatar, cloud stats, and match records.
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActionModal({ isOpen: true, type: 'delete' })}
+                className="py-2 px-4 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-extrabold shadow-md shadow-red-500/20 transition-all cursor-pointer self-start sm:self-auto shrink-0"
+              >
+                Delete Account
+              </button>
+            </div>
+          )}
+
+          {/* Reset Browser Storage Cache */}
+          <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 rounded-2xl bg-[var(--background)] border border-[var(--surface-border)] text-[var(--foreground-muted)] flex items-center justify-center shrink-0">
+                <Trash2 size={18} />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-bold text-[var(--foreground)]">{getTranslation(interfaceLanguage, 'reset_data')}</span>
+                <span className="text-xs text-[var(--foreground-muted)] max-w-sm">
+                  Clear local device cache and reload the application.
+                </span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm("Reset local device cache and reload?")) {
+                  localStorage.removeItem('wordly-player-storage');
+                  localStorage.removeItem('wordly-game-storage');
+                  localStorage.removeItem('wordly-settings-storage');
+                  window.location.reload();
+                }
+              }}
+              className="py-2 px-4 rounded-xl border border-[var(--surface-border)] hover:bg-[var(--surface-border)] text-xs font-bold text-[var(--foreground-muted)] hover:text-[var(--foreground)] transition-colors cursor-pointer self-start sm:self-auto shrink-0"
+            >
+              Clear Local Cache
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Confirmation Action Modal */}
+      <AccountActionModal
+        isOpen={actionModal.isOpen}
+        type={actionModal.type}
+        onClose={() => setActionModal(prev => ({ ...prev, isOpen: false }))}
+      />
     </main>
   );
 }

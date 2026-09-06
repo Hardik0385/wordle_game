@@ -5,9 +5,10 @@ import {
   User, 
   signInWithPopup, 
   signOut as firebaseSignOut, 
-  onAuthStateChanged 
+  onAuthStateChanged,
+  deleteUser
 } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { auth, db, googleProvider } from '@/lib/firebase/config';
 import { usePlayerStore, GameStats } from '@/store/player-store';
 import { getDefaultAvatar } from '@/lib/avatars';
@@ -31,6 +32,8 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   updateUserProfile: (displayName: string, bio: string, photoURL: string) => Promise<void>;
+  resetAccountStats: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -40,6 +43,8 @@ const AuthContext = createContext<AuthContextType>({
   signInWithGoogle: async () => {},
   logout: async () => {},
   updateUserProfile: async () => {},
+  resetAccountStats: async () => {},
+  deleteAccount: async () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -187,6 +192,92 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const resetAccountStats = async () => {
+    if (!user) return;
+    try {
+      setLoading(true);
+      const userDocRef = doc(db, 'users', user.uid);
+      await setDoc(userDocRef, {
+        rating: 1200,
+        gamesPlayed: 0,
+        gamesWon: 0,
+        stats: {
+          gamesPlayed: 0,
+          gamesWon: 0,
+          currentStreak: 0,
+          bestStreak: 0,
+          guessesDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
+        },
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
+
+      setProfile((prev) => prev ? {
+        ...prev,
+        rating: 1200,
+        gamesPlayed: 0,
+        gamesWon: 0,
+      } : null);
+
+      usePlayerStore.getState().loadCloudStats({
+        gamesPlayed: 0,
+        gamesWon: 0,
+        currentStreak: 0,
+        bestStreak: 0,
+        guessesDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
+      }, profile?.displayName || user.displayName || 'Player');
+
+      toast.success('Account statistics successfully reset to default!');
+    } catch (error: any) {
+      console.error('Reset stats error:', error);
+      toast.error(error.message || 'Failed to reset statistics');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteAccount = async () => {
+    if (!user) return;
+    try {
+      setLoading(true);
+      // 1. Delete Firestore user document
+      const userDocRef = doc(db, 'users', user.uid);
+      await deleteDoc(userDocRef);
+
+      // 2. Clear local stores and storage
+      usePlayerStore.getState().resetToGuest();
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('wordly-player-storage');
+        localStorage.removeItem('wordly-game-storage');
+      }
+
+      // 3. Delete the Firebase Auth User
+      try {
+        await deleteUser(user);
+      } catch (authErr: any) {
+        if (authErr.code === 'auth/requires-recent-login') {
+          // Reauthenticate with Google popup and retry delete
+          const credential = await signInWithPopup(auth, googleProvider);
+          if (credential.user) {
+            await deleteUser(credential.user);
+          }
+        } else {
+          throw authErr;
+        }
+      }
+
+      setUser(null);
+      setProfile(null);
+      toast.success('Your account and cloud data have been permanently deleted.');
+    } catch (error: any) {
+      console.error('Delete account error:', error);
+      toast.error(error.message || 'Failed to delete account');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     try {
       await firebaseSignOut(auth);
@@ -199,7 +290,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signInWithGoogle, logout, updateUserProfile }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      profile, 
+      loading, 
+      signInWithGoogle, 
+      logout, 
+      updateUserProfile,
+      resetAccountStats,
+      deleteAccount
+    }}>
       {children}
     </AuthContext.Provider>
   );
