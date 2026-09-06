@@ -356,6 +356,7 @@ export const useGameStore = create<GameState>()(
             timerRunning: false,
             error: "Timed challenge ended because you switched away.",
             savedGamesByMode: updatedSaved,
+            resultModalSeen: false,
           });
 
           usePlayerStore.getState().recordGameResult(false, current.guesses.length);
@@ -413,6 +414,8 @@ export const useGameStore = create<GameState>()(
             chaosModifier: savedForNewMode.chaosModifier,
             customChallengeWord: savedForNewMode.customChallengeWord,
             savedGamesByMode: updatedSaved,
+            // Already completed — don't pop the result modal on re-navigation
+            resultModalSeen: true,
           });
           return;
         }
@@ -611,7 +614,9 @@ export const useGameStore = create<GameState>()(
               timerSeconds: 0,
               timerRunning: false,
               status: 'lost',
-              error: `Time's up! Word: ${targetWord}`,
+              error: `Time's up! The word was: ${targetWord}`,
+              // Show the result modal fresh
+              resultModalSeen: false,
             });
             usePlayerStore.getState().recordGameResult(false, get().guesses.length);
           } else {
