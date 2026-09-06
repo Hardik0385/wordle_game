@@ -13,8 +13,17 @@ export async function syncGameResultToFirebase(
 
   try {
     const userDocRef = doc(db, 'users', currentUser.uid);
-    // Calculate ELO change: +25 for win, -10 for loss (minimum 100)
-    const eloChange = won ? 25 : -10;
+    // Dynamic ELO system for all modes (Solo & Multiplayer):
+    // 1-2 guesses: +30 ELO (genius tier)
+    // 3-4 guesses: +25 ELO (strong solve)
+    // 5-6 guesses: +15 ELO (standard solve)
+    // Loss: -10 ELO (minimum rating protected at 100)
+    let eloChange = -10;
+    if (won) {
+      if (attempts <= 2) eloChange = 30;
+      else if (attempts <= 4) eloChange = 25;
+      else eloChange = 15;
+    }
 
     const updateData: any = {
       gamesPlayed: increment(1),
@@ -33,7 +42,9 @@ export async function syncGameResultToFirebase(
     }
 
     await setDoc(userDocRef, updateData, { merge: true });
+    return eloChange;
   } catch (error) {
     console.error('Error syncing game result to Firebase:', error);
+    return 0;
   }
 }

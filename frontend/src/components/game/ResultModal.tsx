@@ -53,6 +53,7 @@ export function ResultModal() {
   const isDaily = gameMode === 'daily';
 
   const xpGained = won ? (isDaily ? 150 : 100) + ((maxGuesses - guesses.length) * 20) : 10;
+  const eloChange = won ? (guesses.length <= 2 ? '+30' : guesses.length <= 4 ? '+25' : '+15') : '-10';
 
   const handleNextWord = () => {
     dismissResultModal();
@@ -102,6 +103,13 @@ export function ResultModal() {
 
         {/* Stats Showcase */}
         <div className="w-full bg-[#12151c] rounded-2xl p-4 flex justify-around mb-5 border border-[#222735]">
+          <div className="flex flex-col items-center">
+            <span className={`text-xl font-black ${won ? 'text-[#2ec47d]' : 'text-red-400'}`}>
+              {eloChange}
+            </span>
+            <span className="text-[10px] text-[#8e95a5] uppercase font-bold tracking-wider">Rating (ELO)</span>
+          </div>
+
           <div className="flex flex-col items-center">
             <span className="text-xl font-black text-[#2ec47d]">+{xpGained}</span>
             <span className="text-[10px] text-[#8e95a5] uppercase font-bold tracking-wider">XP Gained</span>

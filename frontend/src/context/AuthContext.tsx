@@ -8,7 +8,7 @@ import {
   onAuthStateChanged,
   deleteUser
 } from 'firebase/auth';
-import { doc, setDoc, deleteDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, serverTimestamp, getDoc, onSnapshot } from 'firebase/firestore';
 import { auth, db, googleProvider } from '@/lib/firebase/config';
 import { usePlayerStore, GameStats } from '@/store/player-store';
 import { getDefaultAvatar } from '@/lib/avatars';
@@ -134,10 +134,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    let docUnsub: (() => void) | null = null;
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (docUnsub) {
+        docUnsub();
+        docUnsub = null;
+      }
+
       if (currentUser) {
         await loadAccountFromFirestore(currentUser);
+
+        // Real-time listener: instantly reflect ELO, wins, and stats from solo and duel games!
+        const userDocRef = doc(db, 'users', currentUser.uid);
+        docUnsub = onSnapshot(userDocRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.data();
+            setProfile((prev) => prev ? {
+              ...prev,
+              rating: data.rating ?? 1200,
+              gamesPlayed: data.gamesPlayed ?? 0,
+              gamesWon: data.gamesWon ?? 0,
+              duelWins: data.duelWins ?? 0,
+              duelLosses: data.duelLosses ?? 0,
+            } : null);
+          }
+        });
       } else {
         setProfile(null);
         // User logged out: wipe local stats so guest stats don't linger
@@ -146,7 +169,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      if (docUnsub) docUnsub();
+    };
   }, []);
 
   const updateUserProfile = async (displayName: string, bio: string, photoURL: string) => {
