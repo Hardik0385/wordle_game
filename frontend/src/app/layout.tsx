@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/layout/Navigation";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
-import { NamePromptModal } from "@/components/player/NamePromptModal";
 import { AuthProvider } from "@/context/AuthContext";
 import { AuthGateModal } from "@/components/auth/AuthGateModal";
 import { Toaster } from "react-hot-toast";
@@ -54,7 +53,6 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <AuthGateModal />
-            <NamePromptModal />
             <Navigation />
             <div className="flex-1 pb-20 md:pb-0 overflow-y-auto">
               {children}

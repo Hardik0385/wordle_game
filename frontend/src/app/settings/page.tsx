@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { useSettingsStore } from '@/store/settings-store';
 import { usePlayerStore } from '@/store/player-store';
 import { useGameStore } from '@/store/game-store';
+import { useAuth } from '@/context/AuthContext';
+import { EditProfileModal } from '@/components/player/EditProfileModal';
+import { getDefaultAvatar } from '@/lib/avatars';
 import { sounds } from '@/lib/sound';
 import { 
   ShieldAlert, 
@@ -20,7 +23,10 @@ import {
   Languages, 
   Globe, 
   ChevronRight,
-  Trash2
+  Trash2,
+  Edit3,
+  Trophy,
+  Cloud
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getTranslation } from '@/lib/translations';
@@ -51,7 +57,9 @@ export default function SettingsPage() {
   } = useSettingsStore();
 
   const { name, setName } = usePlayerStore();
+  const { user, profile, signInWithGoogle } = useAuth();
   const [showHardModeInfo, setShowHardModeInfo] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
   // 1. Hard Mode Handler
   const handleHardModeToggle = () => {
@@ -142,21 +150,51 @@ export default function SettingsPage() {
         <h1 className="text-3xl font-black text-[var(--foreground)]">{getTranslation(interfaceLanguage, 'settings_title')}</h1>
       </header>
 
-      {/* Profile Name Card */}
-      <div className="bg-[var(--surface)] border border-[var(--surface-border)] p-5 rounded-3xl flex items-center justify-between shadow-sm">
-        <div className="flex flex-col">
-          <span className="text-xs font-bold text-[var(--foreground-muted)] uppercase">Player Name</span>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-            }}
-            className="text-base font-black bg-transparent text-[var(--foreground)] border-b border-gray-500/30 focus:border-[#2ec47d] focus:outline-none py-1"
-          />
+      {/* Cloud Account Profile Card */}
+      {user ? (
+        <div className="bg-[var(--surface)] border border-[var(--surface-border)] p-5 rounded-3xl flex items-center justify-between shadow-sm">
+          <div className="flex items-center gap-3.5">
+            <img
+              src={profile?.photoURL || user.photoURL || getDefaultAvatar(user.uid)}
+              alt={profile?.displayName || 'Player'}
+              className="w-14 h-14 rounded-full border-2 border-[#2ec47d] object-cover bg-[var(--background)] shadow"
+            />
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#2ec47d] flex items-center gap-1">
+                <Cloud size={11} /> Cloud Account
+              </span>
+              <span className="text-lg font-black text-[var(--foreground)] leading-tight">
+                {profile?.displayName || user.displayName || 'Player'}
+              </span>
+              <span className="text-xs text-[var(--foreground-muted)]">
+                {profile?.bio || 'Wordle Enthusiast'} • {profile?.rating ?? 1200} ELO
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsEditProfileOpen(true)}
+            className="flex items-center gap-1.5 py-2 px-3.5 rounded-2xl bg-[#2ec47d]/15 hover:bg-[#2ec47d]/25 text-[#2ec47d] font-bold text-xs transition-colors cursor-pointer"
+          >
+            <Edit3 size={14} />
+            Edit
+          </button>
         </div>
-        <span className="text-2xl">👋</span>
-      </div>
+      ) : (
+        <div className="bg-[var(--surface)] border border-[var(--surface-border)] p-5 rounded-3xl flex items-center justify-between shadow-sm">
+          <div className="flex flex-col">
+            <span className="text-sm font-bold text-[var(--foreground)]">Not Signed In</span>
+            <span className="text-xs text-[var(--foreground-muted)]">Sign in with Google to sync stats & customize your avatar</span>
+          </div>
+          <button
+            onClick={signInWithGoogle}
+            className="py-2 px-4 rounded-xl bg-[#2ec47d] text-white font-bold text-xs cursor-pointer hover:bg-[#26a86b] transition-colors"
+          >
+            Sign In
+          </button>
+        </div>
+      )}
+
+      <EditProfileModal isOpen={isEditProfileOpen} onClose={() => setIsEditProfileOpen(false)} />
 
       {/* GAMEPLAY SECTION */}
       <section className="flex flex-col gap-2">
