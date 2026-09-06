@@ -5,6 +5,9 @@
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-border: var(--surface-border);
+  --color-foreground-muted: var(--foreground-muted);
 }
 
 :root {

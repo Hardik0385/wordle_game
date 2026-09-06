@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Lock, Sparkles, Loader2, ArrowLeft } from 'lucide-react';
@@ -13,29 +14,47 @@ export function AuthGateModal() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, signInWithGoogle } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Check if current route is protected
   const isProtected = PROTECTED_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`) || pathname.startsWith(`${prefix}?`)
   );
 
-  if (!isProtected) return null;
+  if (!isProtected || !mounted) return null;
 
   if (loading) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
-        <div className="flex flex-col items-center gap-3 p-6 rounded-3xl bg-[var(--surface)] border border-[var(--surface-border)]">
+    return createPortal(
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-sm">
+        <div
+          style={{
+            backgroundColor: 'var(--surface, #191d27)',
+            borderColor: 'var(--surface-border, #262b38)',
+          }}
+          className="flex flex-col items-center gap-3 p-6 rounded-3xl border shadow-2xl"
+        >
           <Loader2 className="animate-spin text-[#2ec47d]" size={32} />
           <span className="text-xs font-bold text-[var(--foreground-muted)]">Checking player session...</span>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
   if (!user) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-lg animate-in fade-in duration-200 select-none">
-        <div className="bg-[var(--surface)] border border-[var(--surface-border)] rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl flex flex-col items-center text-center relative overflow-hidden animate-in zoom-in-95 duration-200">
+    return createPortal(
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 select-none">
+        <div
+          style={{
+            backgroundColor: 'var(--surface, #191d27)',
+            borderColor: 'var(--surface-border, #262b38)',
+          }}
+          className="border rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl flex flex-col items-center text-center relative overflow-hidden animate-in zoom-in-95 duration-200"
+        >
           
           {/* Glow Accent */}
           <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-48 h-48 bg-[#2ec47d]/20 rounded-full blur-3xl pointer-events-none" />
@@ -85,7 +104,8 @@ export function AuthGateModal() {
             <span>Return to Home</span>
           </Link>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
