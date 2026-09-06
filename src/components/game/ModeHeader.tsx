@@ -13,7 +13,6 @@ import {
   Trophy, 
   Sparkles, 
   Settings, 
-  Share2, 
   Shuffle 
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -24,16 +23,16 @@ interface ModeHeaderProps {
 }
 
 export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
-  const { 
-    gameMode, 
-    timerSeconds, 
-    timerMaxSeconds, 
-    survivalLives, 
-    survivalMaxLives, 
-    survivalStreak, 
-    survivalBest, 
-    endlessStage, 
-    endlessScore, 
+  const {
+    gameMode,
+    timerSeconds,
+    timerMaxSeconds,
+    survivalLives,
+    survivalMaxLives,
+    survivalStreak,
+    survivalBest,
+    endlessStage,
+    endlessScore,
     chaosModifier,
     elapsedSeconds,
     wordLength,
@@ -49,23 +48,23 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
   const timerPercentage = Math.max(0, Math.min(100, (timerSeconds / timerMaxSeconds) * 100));
   const isTimerUrgent = isTimedChallenge && timerSeconds <= 15;
 
-  const modeDisplayName = 
+  const modeDisplayName =
     gameMode === 'classic' ? getTranslation(interfaceLanguage, 'classic') :
-    gameMode === 'daily' ? getTranslation(interfaceLanguage, 'daily') :
-    gameMode === 'unlimited' ? 'Practice' :
-    gameMode === 'timed' ? 'Timed' :
-    gameMode === 'survival' ? 'Survival' :
-    gameMode === 'endless' ? 'Endless' :
-    gameMode === 'chaos' ? 'Chaos' : 'Custom';
+      gameMode === 'daily' ? getTranslation(interfaceLanguage, 'daily') :
+        gameMode === 'unlimited' ? 'Practice' :
+          gameMode === 'timed' ? 'Timed' :
+            gameMode === 'survival' ? 'Survival' :
+              gameMode === 'endless' ? 'Endless' :
+                gameMode === 'chaos' ? 'Chaos' : 'Custom';
 
-  const modeSubtitle = 
+  const modeSubtitle =
     gameMode === 'classic' ? getTranslation(interfaceLanguage, 'standard') :
-    gameMode === 'daily' ? 'OFFICIAL CHALLENGE' :
-    gameMode === 'unlimited' ? 'UNLIMITED' :
-    gameMode === 'timed' ? 'SPEED RUSH' :
-    gameMode === 'survival' ? `${survivalLives} LIVES REMAINING` :
-    gameMode === 'endless' ? `STAGE ${endlessStage}` :
-    gameMode === 'chaos' ? 'MODIFIERS ACTIVE' : 'USER RULES';
+      gameMode === 'daily' ? 'OFFICIAL CHALLENGE' :
+        gameMode === 'unlimited' ? 'UNLIMITED' :
+          gameMode === 'timed' ? 'SPEED RUSH' :
+            gameMode === 'survival' ? `${survivalLives} LIVES REMAINING` :
+              gameMode === 'endless' ? `STAGE ${endlessStage}` :
+                gameMode === 'chaos' ? 'MODIFIERS ACTIVE' : 'USER RULES';
 
   return (
     <div className="w-full max-w-lg mb-1 sm:mb-2.5 flex flex-col gap-1.5 sm:gap-2.5 shrink-0">
@@ -124,7 +123,7 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
       )}
 
       {/* Mode-Specific Interactive HUD */}
-      
+
       {/* 1. TIMED MODE OR CHAOS SPEED COUNTDOWN HUD */}
       {isTimedChallenge && (
         <div className="flex flex-col gap-1.5 bg-[var(--surface)] p-3 rounded-2xl border border-[var(--surface-border)]">
@@ -137,14 +136,13 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
             </span>
           </div>
           <div className="w-full h-2 bg-[var(--background)] rounded-full overflow-hidden">
-            <div 
-              className={`h-full transition-all duration-1000 ease-linear rounded-full ${
-                isTimerUrgent 
-                  ? 'bg-red-500 animate-pulse' 
-                  : timerSeconds <= 30 
-                  ? 'bg-amber-500' 
-                  : 'bg-[#2ec47d]'
-              }`}
+            <div
+              className={`h-full transition-all duration-1000 ease-linear rounded-full ${isTimerUrgent
+                  ? 'bg-red-500 animate-pulse'
+                  : timerSeconds <= 30
+                    ? 'bg-amber-500'
+                    : 'bg-[#2ec47d]'
+                }`}
               style={{ width: `${timerPercentage}%` }}
             />
           </div>
@@ -239,18 +237,6 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
                 <Settings size={13} /> Rules
               </button>
             )}
-            <button
-              onClick={async () => {
-                const currentTarget = useGameStore.getState().targetWord;
-                const encoded = btoa(currentTarget);
-                const url = `${window.location.origin}/play?mode=custom&challenge=${encoded}&len=${wordLength}&g=${maxGuesses}`;
-                await navigator.clipboard.writeText(url);
-                toast.success('Challenge link copied to clipboard! Send to friends 🔗');
-              }}
-              className="flex items-center gap-1 text-blue-400 hover:underline"
-            >
-              <Share2 size={13} /> Share
-            </button>
           </div>
         </div>
       )}

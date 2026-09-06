@@ -64,9 +64,9 @@ const MODES: { id: GameMode; name: string; description: string; icon: string; ta
   { 
     id: 'custom', 
     name: 'Custom Game', 
-    description: 'Configure 4, 5, or 6 letter words, adjust attempts, or send a secret challenge link to friends.', 
+    description: 'Configure 4, 5, or 6 letter words and customize max attempts to your liking.', 
     icon: '⚙️',
-    tag: 'VERSUS / SHARE',
+    tag: 'CUSTOM RULES',
     color: 'border-pink-500/30 hover:border-pink-500/60'
   },
 ];

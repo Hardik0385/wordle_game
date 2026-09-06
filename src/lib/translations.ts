@@ -46,7 +46,6 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     try_again: 'Try Again',
     next_word: 'Next Word',
     other_modes: 'Other Modes',
-    share_result: 'Share Result',
 
     // Settings
     settings_title: 'Settings',
@@ -120,7 +119,6 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     try_again: 'Reintentar',
     next_word: 'Siguiente Palabra',
     other_modes: 'Otros Modos',
-    share_result: 'Compartir Resultado',
 
     // Settings
     settings_title: 'Ajustes',
@@ -194,7 +192,6 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     try_again: 'Réessayer',
     next_word: 'Mot Suivant',
     other_modes: 'Autres Modes',
-    share_result: 'Partager le Résultat',
 
     // Settings
     settings_title: 'Paramètres',
@@ -268,7 +265,6 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     try_again: 'Erneut versuchen',
     next_word: 'Nächstes Wort',
     other_modes: 'Andere Modi',
-    share_result: 'Ergebnis teilen',
 
     // Settings
     settings_title: 'Einstellungen',

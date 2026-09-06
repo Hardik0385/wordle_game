@@ -4,31 +4,28 @@ import { useGameStore } from '@/store/game-store';
 import { usePlayerStore } from '@/store/player-store';
 import { useSettingsStore } from '@/store/settings-store';
 import { getTranslation } from '@/lib/translations';
-import { evaluateGuess } from '@/engine/guess-evaluator';
 import Link from 'next/link';
-import { toast } from 'react-hot-toast';
 
 export function ResultModal() {
-  const { 
-    status, 
-    targetWord, 
-    guesses, 
-    maxGuesses, 
-    resetGame, 
-    gameMode, 
-    survivalLives, 
-    survivalStreak, 
-    nextSurvivalWord, 
-    endlessStage, 
-    endlessScore, 
-    nextEndlessStage, 
+  const {
+    status,
+    targetWord,
+    guesses,
+    maxGuesses,
+    resetGame,
+    gameMode,
+    survivalLives,
+    survivalStreak,
+    nextSurvivalWord,
+    endlessStage,
+    endlessScore,
+    nextEndlessStage,
     nextChaosWord,
     timerSeconds,
     timerMaxSeconds
   } = useGameStore();
   const { stats } = usePlayerStore();
   const interfaceLanguage = useSettingsStore(state => state.interfaceLanguage);
-  const colorblindMode = useSettingsStore(state => state.colorblindMode);
 
   if (status === 'playing') return null;
 
@@ -43,25 +40,25 @@ export function ResultModal() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
       <div className="bg-[var(--surface)] w-full max-w-sm rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center animate-in zoom-in-95 duration-200 border border-[var(--surface-border)]">
-        
+
         <div className="text-5xl mb-3">
           {won ? '🎉' : isSurvival && survivalLives > 0 ? '💔' : '💀'}
         </div>
 
         <h2 className="text-2xl font-black text-[var(--foreground)] mb-1">
-          {won 
-            ? isEndless 
-              ? `Stage ${endlessStage} Cleared!` 
-              : isSurvival 
-              ? 'Streak +1!' 
-              : getTranslation(interfaceLanguage, 'congratulations')
+          {won
+            ? isEndless
+              ? `Stage ${endlessStage} Cleared!`
+              : isSurvival
+                ? 'Streak +1!'
+                : getTranslation(interfaceLanguage, 'congratulations')
             : isSurvival && survivalLives > 0
               ? 'Heart Lost!'
               : getTranslation(interfaceLanguage, 'game_over')}
         </h2>
-        
+
         <p className="text-[var(--foreground-muted)] mb-5 text-xs sm:text-sm">
-          {won 
+          {won
             ? `You guessed the word in ${guesses.length} attempts.`
             : `${getTranslation(interfaceLanguage, 'the_word_was')} ${targetWord}.`}
         </p>
@@ -107,66 +104,48 @@ export function ResultModal() {
         <div className="w-full flex flex-col gap-2.5">
           {/* Primary mode advancement button */}
           {isSurvival && (won || survivalLives > 0) ? (
-            <button 
+            <button
               onClick={() => nextSurvivalWord()}
               className="w-full py-3.5 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm transition-colors shadow-lg shadow-orange-500/20"
             >
               {won ? 'Next Word (Keep Streak 🔥)' : `Next Word (${survivalLives} Lives Left ❤️)`}
             </button>
           ) : isEndless && won ? (
-            <button 
+            <button
               onClick={() => nextEndlessStage()}
               className="w-full py-3.5 rounded-2xl bg-[#2ec47d] hover:bg-[#28b371] text-black font-black text-sm transition-colors shadow-lg shadow-[#2ec47d]/20"
             >
               Advance to Stage {endlessStage + 1} 📈
             </button>
           ) : isChaos ? (
-            <button 
+            <button
               onClick={() => nextChaosWord()}
               className="w-full py-3.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-sm transition-colors shadow-lg shadow-purple-600/20"
             >
               Next Chaos Challenge 🌪️
             </button>
           ) : (
-            <button 
+            <button
               onClick={() => resetGame()}
               className="w-full py-3.5 rounded-2xl bg-[#2ec47d] hover:bg-[#28b371] text-black font-black text-sm transition-colors shadow-lg shadow-[#2ec47d]/20"
             >
               {won ? getTranslation(interfaceLanguage, 'next_word') : getTranslation(interfaceLanguage, 'try_again')}
             </button>
           )}
-          
+
           <div className="flex gap-2 w-full">
-            <Link 
+            <Link
               href="/modes"
               className="flex-1 py-2.5 rounded-2xl bg-[var(--background)] hover:bg-[var(--surface-border)] font-bold text-xs text-[var(--foreground)] transition-colors flex items-center justify-center border border-[var(--surface-border)]"
             >
               {getTranslation(interfaceLanguage, 'other_modes')}
             </Link>
-            <button 
-              onClick={async () => {
-                const isDark = document.documentElement.getAttribute('data-theme') === 'midnight' || document.documentElement.classList.contains('dark');
-                const absentEmoji = isDark ? '⬛' : '⬜';
-                const correctEmoji = colorblindMode ? '🟧' : '🟩';
-                const presentEmoji = colorblindMode ? '🟦' : '🟨';
-                
-                const grid = guesses.map(guess => {
-                  return evaluateGuess(guess, targetWord)
-                    .map(e => e.state === 'correct' ? correctEmoji : e.state === 'present' ? presentEmoji : absentEmoji)
-                    .join('');
-                }).join('\n');
-                
-                const text = `WORDLY ${guesses.length}/${maxGuesses}\n\n${grid}`;
-                
-                if (navigator.clipboard) {
-                  await navigator.clipboard.writeText(text);
-                  toast.success('Results copied to clipboard!');
-                }
-              }}
-              className="flex-1 py-2.5 rounded-2xl bg-[var(--background)] hover:bg-[var(--surface-border)] font-bold text-xs text-[var(--foreground)] transition-colors flex items-center justify-center gap-1.5 border border-[var(--surface-border)]"
+            <Link
+              href="/stats"
+              className="flex-1 py-2.5 rounded-2xl bg-[var(--background)] hover:bg-[var(--surface-border)] font-bold text-xs text-[var(--foreground)] transition-colors flex items-center justify-center border border-[var(--surface-border)]"
             >
-              {getTranslation(interfaceLanguage, 'share_result')}
-            </button>
+              {getTranslation(interfaceLanguage, 'stats')}
+            </Link>
           </div>
         </div>
 
