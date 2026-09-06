@@ -241,8 +241,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true);
       // 1. Delete Firestore user document
-      const userDocRef = doc(db, 'users', user.uid);
-      await deleteDoc(userDocRef);
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        await deleteDoc(userDocRef);
+      } catch (docErr: any) {
+        console.warn('Firestore doc delete note:', docErr);
+      }
 
       // 2. Clear local stores and storage
       usePlayerStore.getState().resetToGuest();
