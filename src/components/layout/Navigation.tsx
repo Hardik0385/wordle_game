@@ -8,7 +8,7 @@ import { useSettingsStore } from '@/store/settings-store';
 import { getTranslation } from '@/lib/translations';
 
 const navItems = [
-  { key: 'play', href: '/play', icon: LayoutGrid },
+  { key: 'play', href: '/modes', icon: LayoutGrid },
   { key: 'stats', href: '/stats', icon: BarChart2 },
   { key: 'daily', href: '/daily', icon: Calendar },
   { key: 'awards', href: '/achievements', icon: Trophy },
@@ -39,7 +39,9 @@ export function Navigation() {
         <div className="flex flex-col gap-2">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || (item.href === '/settings' && pathname.startsWith('/settings'));
+          const isActive = pathname === item.href
+            || (item.key === 'play' && (pathname === '/play' || pathname.startsWith('/play?') || pathname === '/modes'))
+            || (item.href === '/settings' && pathname.startsWith('/settings'));
             const label = getTranslation(interfaceLanguage, item.key);
             return (
               <Link 
@@ -64,7 +66,9 @@ export function Navigation() {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-[var(--surface-border)] bg-[var(--surface)]/95 backdrop-blur-lg z-50 flex justify-around p-2 pb-safe transition-colors">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href || (item.href === '/settings' && pathname.startsWith('/settings'));
+          const isActive = pathname === item.href
+            || (item.key === 'play' && (pathname === '/play' || pathname.startsWith('/play?') || pathname === '/modes'))
+            || (item.href === '/settings' && pathname.startsWith('/settings'));
           const label = getTranslation(interfaceLanguage, item.key);
           return (
             <Link 
