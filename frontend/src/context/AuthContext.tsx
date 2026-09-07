@@ -194,10 +194,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } : null);
 
       usePlayerStore.getState().setName(displayName.trim() || 'Player');
-      toast.success('Profile updated successfully! ✨');
+      toast.success('Profile updated successfully! ✨', { id: 'auth-toast' });
     } catch (error: any) {
       console.error('Failed to update profile:', error);
-      toast.error(error.message || 'Failed to update profile');
+      toast.error(error.message || 'Failed to update profile', { id: 'auth-toast' });
       throw error;
     }
   };
@@ -209,10 +209,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (result.user) {
         await loadAccountFromFirestore(result.user);
       }
-      toast.success('Welcome back!');
+      toast.success('Welcome back!', { id: 'auth-toast' });
     } catch (error: any) {
       console.error('Google sign in error:', error);
-      toast.error(error.message || 'Failed to sign in with Google');
+      toast.error(error.message || 'Failed to sign in with Google', { id: 'auth-toast' });
     } finally {
       setLoading(false);
     }
@@ -252,10 +252,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         guessesDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
       }, profile?.displayName || user.displayName || 'Player');
 
-      toast.success('Account statistics successfully reset to default!');
+      toast.success('Account statistics successfully reset to default!', { id: 'auth-toast' });
     } catch (error: any) {
       console.error('Reset stats error:', error);
-      toast.error(error.message || 'Failed to reset statistics');
+      toast.error(error.message || 'Failed to reset statistics', { id: 'auth-toast' });
       throw error;
     } finally {
       setLoading(false);
@@ -298,10 +298,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUser(null);
       setProfile(null);
-      toast.success('Your account and cloud data have been permanently deleted.');
+      toast.success('Your account and cloud data have been permanently deleted.', { id: 'auth-toast' });
     } catch (error: any) {
       console.error('Delete account error:', error);
-      toast.error(error.message || 'Failed to delete account');
+      toast.error(error.message || 'Failed to delete account', { id: 'auth-toast' });
       throw error;
     } finally {
       setLoading(false);
@@ -312,10 +312,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await firebaseSignOut(auth);
       usePlayerStore.getState().resetToGuest();
-      toast.success('Signed out');
+      toast.success('Signed out', { id: 'auth-toast' });
     } catch (error: any) {
       console.error('Sign out error:', error);
-      toast.error('Failed to sign out');
+      toast.error('Failed to sign out', { id: 'auth-toast' });
     }
   };
 

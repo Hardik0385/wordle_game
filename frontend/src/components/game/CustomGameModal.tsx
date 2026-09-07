@@ -37,7 +37,7 @@ export function CustomGameModal({ isOpen, onClose }: CustomGameModalProps) {
     }
 
     configureCustom(length, maxGuesses, wordToUse);
-    toast.success('Custom game configured!');
+    toast.success('Custom game configured!', { id: 'custom-game-toast' });
     onClose();
   };
 

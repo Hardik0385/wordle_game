@@ -109,7 +109,7 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
     if (gameOver || mySolved || submitting) return;
 
     if (currentGuess.length !== wordLength) {
-      toast.error(`Guess must be ${wordLength} letters`);
+      toast.error(`Guess must be ${wordLength} letters`, { id: 'game-error' });
       return;
     }
 
@@ -123,7 +123,7 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
 
     // Check validity against dictionary
     if (!isValidWord(upperGuess)) {
-      toast.error('Not in word list');
+      toast.error('Not in word list', { id: 'game-error' });
       return;
     }
 
@@ -132,7 +132,7 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
       const lastGuess = myGuesses[myGuesses.length - 1];
       const hardModeErr = validateHardMode(upperGuess, lastGuess, targetWord);
       if (hardModeErr) {
-        toast.error(hardModeErr);
+        toast.error(hardModeErr, { id: 'game-error' });
         return;
       }
     }

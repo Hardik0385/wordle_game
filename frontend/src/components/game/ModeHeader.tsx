@@ -248,7 +248,7 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
             type="button"
             onClick={() => {
               resetGame();
-              toast('New practice word loaded', { icon: '🎲' });
+              toast('New practice word loaded', { icon: '🎲', id: 'mode-header-toast' });
             }}
             className="text-xs font-bold px-3 py-1 rounded-xl bg-[#181c26] border border-[#262b38] text-gray-300 hover:text-white flex items-center gap-1 transition-colors"
           >

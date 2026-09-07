@@ -61,7 +61,7 @@ export function EditProfileModal({ isOpen, onClose }: EditProfileModalProps) {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!displayName.trim()) {
-      toast.error('Display name cannot be empty');
+      toast.error('Display name cannot be empty', { id: 'profile-toast' });
       return;
     }
 
