@@ -102,11 +102,11 @@ function PlayContent() {
 
       <ModeHeader onOpenCustomModal={() => setCustomModalOpen(true)} />
       
-      <div className="flex-1 flex flex-col justify-center items-center w-full max-w-lg min-h-0">
+      <div className="flex-1 flex flex-col justify-center items-center w-full max-w-lg md:max-w-[600px] min-h-0">
         <Board />
       </div>
       
-      <div className="w-full max-w-lg shrink-0">
+      <div className="w-full max-w-lg md:max-w-[600px] shrink-0">
         <Keyboard />
       </div>
     </main>

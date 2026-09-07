@@ -45,7 +45,7 @@ export function Board() {
   return (
     <div className="flex flex-col items-center w-full">
       {/* Interactive Tile Grid */}
-      <div className="flex flex-col gap-1 sm:gap-1.5 md:gap-2 relative">
+      <div className="flex flex-col gap-1 sm:gap-1.5 md:gap-3 relative">
         {/* Floating Error Toast Notification */}
         {error && (
           <div className="absolute -top-12 left-0 right-0 flex justify-center z-20 pointer-events-none">
@@ -61,7 +61,7 @@ export function Board() {
           const winDuration = animationSpeed === 'off' ? 0 : animationSpeed === 'fast' ? 0.2 : 0.5;
           
           return (
-            <div key={i} className="flex gap-1 sm:gap-1.5 md:gap-2 justify-center">
+            <div key={i} className="flex gap-1 sm:gap-1.5 md:gap-3 justify-center">
               {evaluated.map((e, j) => (
                 <motion.div 
                   key={j}
@@ -78,7 +78,7 @@ export function Board() {
 
         {showCurrentRow && (
           <motion.div 
-            className="flex gap-1 sm:gap-1.5 md:gap-2 justify-center"
+            className="flex gap-1 sm:gap-1.5 md:gap-3 justify-center"
             animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
             transition={{ duration: 0.4 }}
           >
@@ -101,7 +101,7 @@ export function Board() {
         )}
 
         {Array(empties).fill(null).map((_, i) => (
-          <div key={`empty-${i}`} className="flex gap-1 sm:gap-1.5 md:gap-2 justify-center">
+          <div key={`empty-${i}`} className="flex gap-1 sm:gap-1.5 md:gap-3 justify-center">
             {Array(targetWord.length).fill(null).map((_, j) => (
               <Tile key={j} />
             ))}

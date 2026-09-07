@@ -84,9 +84,9 @@ export function Keyboard() {
   }, [handleKey]);
 
   return (
-    <div className="flex w-full flex-col gap-1 sm:gap-1.5 max-w-lg mx-auto select-none">
+    <div className="flex w-full flex-col gap-1 sm:gap-1.5 md:gap-2.5 max-w-lg md:max-w-[600px] mx-auto select-none">
       {ROWS.map((row, i) => (
-        <div key={i} className="flex justify-center gap-1 sm:gap-1.5 w-full">
+        <div key={i} className="flex justify-center gap-1 sm:gap-1.5 md:gap-2 w-full">
           {row.map(key => {
             const state = letterStates.get(key);
             const isSpecial = key === 'ENTER' || key === 'BACKSPACE';
@@ -102,9 +102,9 @@ export function Keyboard() {
                   handleKey(key);
                 }}
                 className={cn(
-                  "relative flex items-center justify-center rounded-lg sm:rounded-xl font-black uppercase transition-all h-[min(2.7rem,5.6vh)] sm:h-[min(3rem,6.5vh)] md:h-[min(3.5rem,7vh)] text-xs min-[360px]:text-sm sm:text-base flex-1 max-w-[2.6rem] sm:max-w-[3.2rem] shadow-sm active:scale-95 outline-none focus:outline-none",
+                  "relative flex items-center justify-center rounded-lg sm:rounded-xl font-black uppercase transition-all h-[min(2.7rem,5.6vh)] sm:h-[min(3rem,6.5vh)] md:h-[min(3.5rem,7vh)] text-xs min-[360px]:text-sm sm:text-base flex-1 max-w-[2.6rem] sm:max-w-[3.2rem] md:max-w-[3.6rem] shadow-sm active:scale-95 outline-none focus:outline-none",
                   {
-                    "max-w-[3.8rem] min-[360px]:max-w-[4.2rem] sm:max-w-[4.8rem] px-0.5 min-[360px]:px-1 text-[9px] min-[360px]:text-[10px] sm:text-xs tracking-tight sm:tracking-wider": isSpecial,
+                    "max-w-[3.8rem] min-[360px]:max-w-[4.2rem] sm:max-w-[4.8rem] md:max-w-[5.5rem] px-0.5 min-[360px]:px-1 text-[9px] min-[360px]:text-[10px] sm:text-xs tracking-tight sm:tracking-wider": isSpecial,
                     "bg-[var(--key-bg)] hover:brightness-110 text-[var(--key-text)]": !state,
                     "bg-[var(--tile-bg-absent)] text-[var(--tile-text-absent)] opacity-60": state === 'absent',
                     "bg-[#0284c7] text-white shadow-md": state === 'present' && colorblindMode,
