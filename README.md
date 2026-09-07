@@ -1,4 +1,7 @@
-# 🟩 WORDLY — Full-Stack Real-Time Word Puzzle & 1v1 Duel Game
+<div align="center">
+  <img src="frontend/public/icon-512.png" alt="Wordly Logo" width="120" />
+  <h1>WORDLY — Full-Stack Real-Time Word Puzzle & 1v1 Duel Game</h1>
+</div>
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.3-black?logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://react.dev/)
