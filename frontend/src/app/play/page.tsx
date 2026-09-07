@@ -93,7 +93,7 @@ function PlayContent() {
   }
 
   return (
-    <main className="flex h-[100dvh] max-h-[100dvh] flex-col items-center justify-between p-2 sm:p-4 md:p-6 pb-[4.25rem] md:pb-4 overflow-hidden select-none">
+    <main className="flex h-[calc(100dvh-5rem)] md:h-[100dvh] max-h-[calc(100dvh-5rem)] md:max-h-[100dvh] flex-col items-center justify-between p-2 sm:p-4 md:p-6 pb-2 md:pb-4 overflow-hidden select-none">
       <ResultModal />
       <CustomGameModal 
         isOpen={customModalOpen} 
