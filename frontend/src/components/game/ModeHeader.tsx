@@ -71,15 +71,17 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
       {/* Clean Top Header */}
       <div className="flex items-center justify-between py-0.5 sm:py-1">
         {/* Back button */}
-        <Link
-          href="/modes"
-          className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-[var(--surface)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background)] transition-colors"
-        >
-          <ChevronLeft size={18} className="sm:w-5 sm:h-5" />
-        </Link>
+        <div className="flex-1 flex justify-start">
+          <Link
+            href="/modes"
+            className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-[var(--surface)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background)] transition-colors"
+          >
+            <ChevronLeft size={18} className="sm:w-5 sm:h-5" />
+          </Link>
+        </div>
 
         {/* Center Mode Title & Subtitle */}
-        <div className="flex flex-col items-center text-center">
+        <div className="flex flex-col items-center text-center shrink-0">
           <h1 className="text-base sm:text-lg font-black text-[var(--foreground)] tracking-wide leading-tight">
             {modeDisplayName}
           </h1>
@@ -89,7 +91,7 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
         </div>
 
         {/* Right Action Icons: Help & Stats */}
-        <div className="flex items-center gap-1 sm:gap-1.5">
+        <div className="flex-1 flex items-center justify-end gap-1 sm:gap-1.5">
           <button
             type="button"
             onClick={() => setShowHelp(!showHelp)}
@@ -118,7 +120,7 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
           <p>• {getTranslation(interfaceLanguage, 'green_tile')}</p>
           <p>• {getTranslation(interfaceLanguage, 'yellow_tile')}</p>
           <p>• {getTranslation(interfaceLanguage, 'dark_tile')}</p>
-          <p className="text-[#2ec47d] font-bold">💡 {getTranslation(interfaceLanguage, 'two_hints_notice')}</p>
+          <p className="text-[#2ec47d] font-bold">💡 {getTranslation(interfaceLanguage, 'one_hint_notice')}</p>
         </div>
       )}
 

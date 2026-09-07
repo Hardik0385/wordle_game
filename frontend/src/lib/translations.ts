@@ -37,7 +37,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     green_tile: 'Green tile: Correct letter in the exact spot.',
     yellow_tile: 'Yellow tile: Letter exists in the word but wrong spot.',
     dark_tile: 'Dark tile: Letter does not appear in the word.',
-    two_hints_notice: 'You have 2 FREE hints every game!',
+    one_hint_notice: 'You have 1 FREE hint every game!',
 
     // Result Modal
     game_over: 'Game Over',
@@ -110,7 +110,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     green_tile: 'Casilla verde: Letra correcta en la posición exacta.',
     yellow_tile: 'Casilla amarilla: La letra existe pero en otra posición.',
     dark_tile: 'Casilla oscura: La letra no está en la palabra.',
-    two_hints_notice: '¡Tienes 2 pistas GRATIS en cada partida!',
+    one_hint_notice: '¡Tienes 1 pista GRATUITA por juego!',
 
     // Result Modal
     game_over: 'Fin de la Partida',
@@ -183,7 +183,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     green_tile: 'Tuile verte : Lettre correcte et bien placée.',
     yellow_tile: 'Tuile jaune : Lettre présente mais mal placée.',
     dark_tile: 'Tuile sombre : La lettre ne figure pas dans le mot.',
-    two_hints_notice: 'Vous disposez de 2 indices GRATUITS par partie !',
+    one_hint_notice: 'Vous avez 1 indice GRATUIT par partie!',
 
     // Result Modal
     game_over: 'Partie Terminée',
@@ -256,7 +256,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     green_tile: 'Grüne Kachel: Richtiger Buchstabe an der richtigen Stelle.',
     yellow_tile: 'Gelbe Kachel: Buchstabe ist enthalten, aber falsche Stelle.',
     dark_tile: 'Dunkle Kachel: Buchstabe kommt nicht im Wort vor.',
-    two_hints_notice: 'Du hast 2 KOSTENLOSE Hinweise pro Spiel!',
+    one_hint_notice: 'Du hast 1 KOSTENLOSEN Hinweis pro Spiel!',
 
     // Result Modal
     game_over: 'Spiel Vorbei',
