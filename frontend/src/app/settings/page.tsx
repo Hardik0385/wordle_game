@@ -44,8 +44,7 @@ export default function SettingsPage() {
     toggleHardMode, 
     wordLength, 
     setWordLength, 
-    hapticsEnabled, 
-    toggleHaptics, 
+
     soundEnabled, 
     toggleSound, 
     showTimer, 
@@ -53,8 +52,7 @@ export default function SettingsPage() {
     appearance,
     setAppearance,
     theme,
-    colorblindMode,
-    toggleColorblindMode,
+
     animationSpeed,
     setAnimationSpeed,
     gameLanguage,
@@ -91,20 +89,6 @@ export default function SettingsPage() {
     }
   };
 
-  // 3. Haptics Handler
-  const handleHapticsToggle = () => {
-    toggleHaptics();
-    const next = !hapticsEnabled;
-    if (next) {
-      if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate([20, 40, 20]);
-      }
-      toast.success('Haptics enabled');
-    } else {
-      toast('Haptics disabled');
-    }
-  };
-
   // 4. Sounds Handler
   const handleSoundsToggle = () => {
     toggleSound();
@@ -125,17 +109,6 @@ export default function SettingsPage() {
       toast.success('Live timer enabled in all games');
     } else {
       toast('Live timer disabled');
-    }
-  };
-
-  // 6. Colorblind Mode Handler
-  const handleColorblindToggle = () => {
-    toggleColorblindMode();
-    const next = !colorblindMode;
-    if (next) {
-      toast.success('High-contrast colorblind mode enabled');
-    } else {
-      toast('Standard colors restored');
     }
   };
 
@@ -270,29 +243,7 @@ export default function SettingsPage() {
             </select>
           </div>
 
-          {/* Haptics */}
-          <div className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-2xl bg-[var(--background)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground)]">
-                <Smartphone size={18} />
-              </div>
-              <span className="text-sm font-bold text-[var(--foreground)]">{getTranslation(interfaceLanguage, 'haptics')}</span>
-            </div>
 
-            <button
-              type="button"
-              onClick={handleHapticsToggle}
-              className={`w-12 h-7 rounded-full transition-colors relative p-0.5 ${
-                hapticsEnabled ? 'bg-[#2ec47d]' : 'bg-gray-400/40'
-              }`}
-            >
-              <div 
-                className={`w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-200 ${
-                  hapticsEnabled ? 'translate-x-5' : 'translate-x-0'
-                }`} 
-              />
-            </button>
-          </div>
 
           {/* Sounds */}
           <div className="p-4 flex items-center justify-between">
@@ -393,53 +344,7 @@ export default function SettingsPage() {
             </select>
           </div>
 
-          {/* Colorblind Mode */}
-          <div className="p-4 flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-2xl bg-[var(--background)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground)]">
-                  <Eye size={18} />
-                </div>
-                <div>
-                  <span className="text-sm font-bold text-[var(--foreground)]">{getTranslation(interfaceLanguage, 'colorblind_mode')}</span>
-                  <p className="text-xs text-[var(--foreground-muted)]">{getTranslation(interfaceLanguage, 'colorblind_desc')}</p>
-                </div>
-              </div>
 
-              <button
-                type="button"
-                onClick={handleColorblindToggle}
-                className={`w-12 h-7 rounded-full transition-colors relative p-0.5 ${
-                  colorblindMode ? 'bg-[#f97316]' : 'bg-gray-400/40'
-                }`}
-              >
-                <div 
-                  className={`w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-200 ${
-                    colorblindMode ? 'translate-x-5' : 'translate-x-0'
-                  }`} 
-                />
-              </button>
-            </div>
-
-            {/* Live Colorblind Mode Preview */}
-            <div className="p-3 rounded-2xl bg-[var(--background)] border border-[var(--surface-border)] flex flex-wrap items-center justify-between gap-2 text-xs">
-              <span className="font-semibold text-[var(--foreground-muted)]">Live Tile Colors:</span>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
-                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-white text-[11px] shadow-sm ${colorblindMode ? 'bg-[#f97316]' : 'bg-[#2ec47d]'}`}>
-                    ✓
-                  </div>
-                  <span className="font-bold text-[var(--foreground)] text-[11px]">{colorblindMode ? 'Orange (Correct)' : 'Green (Correct)'}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-white text-[11px] shadow-sm ${colorblindMode ? 'bg-[#0284c7]' : 'bg-[#d39e33]'}`}>
-                    ●
-                  </div>
-                  <span className="font-bold text-[var(--foreground)] text-[11px]">{colorblindMode ? 'Blue (Present)' : 'Yellow (Present)'}</span>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Animation Speed */}
           <div className="p-4 flex items-center justify-between">
