@@ -45,7 +45,7 @@ export function Board() {
   return (
     <div className="flex flex-col items-center w-full">
       {/* Interactive Tile Grid */}
-      <div className="flex flex-col gap-1 sm:gap-1.5 md:gap-3 relative">
+      <div className="flex flex-col gap-1 sm:gap-1.5 md:gap-3 relative mb-12">
         {/* Floating Error Toast Notification */}
         {error && (
           <div className="absolute -top-12 left-0 right-0 flex justify-center z-20 pointer-events-none">

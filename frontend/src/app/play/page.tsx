@@ -93,7 +93,7 @@ function PlayContent() {
   }
 
   return (
-    <main className="flex h-[100dvh] max-h-[100dvh] flex-col items-center justify-between p-2 sm:p-4 md:p-6 pb-[4.25rem] md:pb-4 overflow-hidden select-none">
+    <main className="flex min-h-[100dvh] flex-col items-center justify-between p-2 sm:p-4 md:p-6 pb-[4.25rem] md:pb-4 select-none">
       <ResultModal />
       <CustomGameModal 
         isOpen={customModalOpen} 
@@ -102,7 +102,7 @@ function PlayContent() {
 
       <ModeHeader onOpenCustomModal={() => setCustomModalOpen(true)} />
       
-      <div className="flex-1 flex flex-col justify-center items-center w-full max-w-lg md:max-w-[600px] min-h-0">
+      <div className="flex-1 flex flex-col justify-center items-center w-full max-w-lg md:max-w-[600px]">
         <Board />
       </div>
       
