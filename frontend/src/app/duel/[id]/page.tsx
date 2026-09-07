@@ -524,8 +524,8 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
                   key={key}
                   type="button"
                   onClick={() => handleKeyInput(key)}
-                  className={`h-11 sm:h-12 md:h-14 rounded-lg sm:rounded-xl font-black text-xs sm:text-sm flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-sm ${keyStyle} ${
-                    isSpecial ? 'max-w-[3.8rem] min-[360px]:max-w-[4.2rem] sm:max-w-[4.8rem] md:max-w-[5.5rem] px-0.5 min-[360px]:px-1 text-[9px] min-[360px]:text-[10px] sm:text-xs tracking-tight sm:tracking-wider' : 'flex-1 max-w-[2.6rem] sm:max-w-[3.2rem] md:max-w-[3.6rem]'
+                  className={`h-[min(2.7rem,6vh)] sm:h-[min(3.2rem,6.5vh)] md:h-[min(3.6rem,7vh)] rounded-lg sm:rounded-xl font-black text-xs sm:text-sm flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-sm ${keyStyle} ${
+                    isSpecial ? 'max-w-[min(3.8rem,7.5vh)] min-[360px]:max-w-[min(4.2rem,8vh)] sm:max-w-[min(4.5rem,8.5vh)] md:max-w-[min(4.8rem,9vh)] px-0.5 min-[360px]:px-1 text-[9px] min-[360px]:text-[10px] sm:text-xs tracking-tight sm:tracking-wider' : 'flex-1 max-w-[min(2.6rem,5vh)] sm:max-w-[min(2.8rem,5.5vh)] md:max-w-[min(3rem,6vh)]'
                   }`}
                 >
                   {key === 'BACKSPACE' ? (

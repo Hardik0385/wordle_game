@@ -39,7 +39,7 @@ export default function DailyPage() {
   const minsLeft = Math.floor((msUntilRefresh % (1000 * 60 * 60)) / (1000 * 60));
 
   return (
-    <main className="flex min-h-[100dvh] flex-col items-center justify-between p-2 sm:p-4 md:p-6 pb-[4.25rem] md:pb-4 select-none">
+    <main className="flex h-[100dvh] max-h-[100dvh] flex-col items-center justify-between p-2 sm:p-4 md:p-6 pb-[4.25rem] md:pb-4 overflow-hidden select-none">
       <ResultModal />
 
       <header className="w-full max-w-lg mb-1 sm:mb-2.5 flex flex-col items-center gap-0.5 py-1 sm:py-2 border-b border-[var(--surface-border)] shrink-0">
@@ -105,7 +105,7 @@ export default function DailyPage() {
         </div>
       ) : (
         <>
-          <div className="flex-1 flex flex-col justify-center items-center w-full max-w-lg md:max-w-[600px]">
+          <div className="flex-1 flex flex-col justify-center items-center w-full max-w-lg md:max-w-[600px] min-h-0">
             <Board />
           </div>
 
