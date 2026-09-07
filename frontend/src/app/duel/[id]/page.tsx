@@ -52,14 +52,20 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
   const [timeLeft, setTimeLeft] = useState<number>(60);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const isInitialLoad = useRef(true);
+
   useEffect(() => {
     if (!roomId) return;
 
     const unsubscribe = onSnapshot(doc(db, 'rooms', roomId), (snapshot) => {
       if (snapshot.exists()) {
         setRoomData(snapshot.data());
+        isInitialLoad.current = false;
       } else {
-        toast.error('Duel room not found');
+        if (isInitialLoad.current) {
+          toast.error('Duel room not found', { id: 'duel-error' });
+        }
+        router.push('/duel');
       }
       setLoading(false);
     });
