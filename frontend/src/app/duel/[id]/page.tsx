@@ -500,9 +500,9 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
       </div>
 
       {/* On-Screen Virtual Keyboard */}
-      <div className="flex flex-col gap-1.5 sm:gap-2 md:gap-2.5 w-full max-w-lg md:max-w-[600px] mx-auto mt-1 select-none">
+      <div className="flex w-full flex-col gap-[min(0.25rem,1vh)] sm:gap-[min(0.375rem,1.2vh)] md:gap-[min(0.6rem,1.5vh)] max-w-lg md:max-w-2xl mx-auto opacity-70 scale-90 sm:scale-100 origin-bottom">
         {KEYBOARD_ROWS.map((row, rowIdx) => (
-          <div key={rowIdx} className="flex justify-center gap-1 sm:gap-1.5 md:gap-2 w-full">
+          <div key={rowIdx} className="flex justify-center gap-[min(0.25rem,1vh)] sm:gap-[min(0.375rem,1.2vh)] md:gap-[min(0.5rem,1.2vh)] w-full">
             {row.map((key) => {
               const isSpecial = key === 'ENTER' || key === 'BACKSPACE';
               const isCursed = isChaosMode && key === cursedLetter;
@@ -524,8 +524,8 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
                   key={key}
                   type="button"
                   onClick={() => handleKeyInput(key)}
-                  className={`h-[min(2.7rem,6vh)] sm:h-[min(3.2rem,6.5vh)] md:h-[min(3.6rem,7vh)] rounded-lg sm:rounded-xl font-black text-xs sm:text-sm flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-sm ${keyStyle} ${
-                    isSpecial ? 'max-w-[min(3.8rem,7.5vh)] min-[360px]:max-w-[min(4.2rem,8vh)] sm:max-w-[min(4.5rem,8.5vh)] md:max-w-[min(4.8rem,9vh)] px-0.5 min-[360px]:px-1 text-[9px] min-[360px]:text-[10px] sm:text-xs tracking-tight sm:tracking-wider' : 'flex-1 max-w-[min(2.6rem,5vh)] sm:max-w-[min(2.8rem,5.5vh)] md:max-w-[min(3rem,6vh)]'
+                  className={`h-[min(3.2rem,5.5vh)] sm:h-[min(3.5rem,6vh)] md:h-[min(3.6rem,6.5vh)] rounded-lg sm:rounded-xl font-black text-xs sm:text-sm flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-sm ${keyStyle} ${
+                    isSpecial ? 'max-w-[min(3.8rem,6.5vh)] min-[360px]:max-w-[min(4.2rem,7vh)] sm:max-w-[min(4.5rem,7.5vh)] md:max-w-[min(4.8rem,8vh)] px-0.5 min-[360px]:px-1 text-[9px] min-[360px]:text-[10px] sm:text-xs tracking-tight sm:tracking-wider' : 'flex-1 max-w-[min(2.6rem,4.5vh)] sm:max-w-[min(2.8rem,5vh)] md:max-w-[min(3rem,5.5vh)]'
                   }`}
                 >
                   {key === 'BACKSPACE' ? (

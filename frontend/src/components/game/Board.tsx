@@ -45,7 +45,7 @@ export function Board() {
   return (
     <div className="flex flex-col items-center w-full">
       {/* Interactive Tile Grid */}
-      <div className="flex flex-col gap-1 sm:gap-1.5 md:gap-3 relative mb-12">
+      <div className="flex flex-col gap-[min(0.25rem,1vh)] sm:gap-[min(0.375rem,1.2vh)] md:gap-[min(0.75rem,1.5vh)] relative mb-12">
         {/* Floating Error Toast Notification */}
         {error && (
           <div className="absolute -top-12 left-0 right-0 flex justify-center z-20 pointer-events-none">
@@ -61,7 +61,7 @@ export function Board() {
           const winDuration = animationSpeed === 'off' ? 0 : animationSpeed === 'fast' ? 0.2 : 0.5;
           
           return (
-            <div key={i} className="flex gap-1 sm:gap-1.5 md:gap-3 justify-center">
+            <div key={i} className="flex justify-center gap-[min(0.25rem,1vh)] sm:gap-[min(0.375rem,1.2vh)] md:gap-[min(0.75rem,1.5vh)]">
               {evaluated.map((e, j) => (
                 <motion.div 
                   key={j}

@@ -30,7 +30,7 @@ export function Tile({ letter, state, isCurrent, isHint, fogged, overrideShape, 
       animate={isEvaluated && animationSpeed !== 'off' ? { rotateX: [0, 90, 0] } : {}}
       transition={{ duration, ease: "easeInOut" }}
       className={cn(
-        "relative flex h-[min(2.85rem,6.4vh)] w-[min(2.85rem,6.4vh)] sm:h-[min(3.5rem,7vh)] sm:w-[min(3.5rem,7vh)] md:h-[min(4rem,7.5vh)] md:w-[min(4rem,7.5vh)] items-center justify-center border-2 text-lg sm:text-3xl font-black uppercase select-none shrink-0",
+        "relative flex h-[min(3.25rem,6.5vh)] w-[min(3.25rem,6.5vh)] sm:h-[min(3.75rem,7vh)] sm:w-[min(3.75rem,7vh)] md:h-[min(4rem,7vh)] md:w-[min(4rem,7vh)] items-center justify-center border-2 text-lg sm:text-3xl font-black uppercase select-none shrink-0",
         animationSpeed !== 'off' ? (animationSpeed === 'fast' ? "transition-all duration-150" : "transition-all duration-300") : "transition-none",
         // Shape
         {

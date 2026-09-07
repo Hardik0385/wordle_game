@@ -84,9 +84,9 @@ export function Keyboard() {
   }, [handleKey]);
 
   return (
-    <div className="flex w-full flex-col gap-1 sm:gap-1.5 md:gap-2.5 max-w-lg md:max-w-[600px] mx-auto select-none">
+    <div className="flex w-full flex-col gap-[min(0.25rem,1vh)] sm:gap-[min(0.375rem,1.2vh)] md:gap-[min(0.6rem,1.5vh)] max-w-lg md:max-w-[600px] mx-auto select-none">
       {ROWS.map((row, i) => (
-        <div key={i} className="flex justify-center gap-1 sm:gap-1.5 md:gap-2 w-full">
+        <div key={i} className="flex justify-center gap-[min(0.25rem,1vh)] sm:gap-[min(0.375rem,1.2vh)] md:gap-[min(0.5rem,1.2vh)] w-full">
           {row.map(key => {
             const state = letterStates.get(key);
             const isSpecial = key === 'ENTER' || key === 'BACKSPACE';
@@ -102,10 +102,10 @@ export function Keyboard() {
                   handleKey(key);
                 }}
                 className={cn(
-                  "relative flex items-center justify-center rounded-lg sm:rounded-xl font-black uppercase transition-all h-[min(2.7rem,6vh)] sm:h-[min(3.2rem,6.5vh)] md:h-[min(3.6rem,7vh)] text-xs min-[360px]:text-sm sm:text-base flex-1 shadow-sm active:scale-95 outline-none focus:outline-none",
+                  "relative flex items-center justify-center rounded-lg sm:rounded-xl font-black uppercase transition-all h-[min(3.2rem,5.5vh)] sm:h-[min(3.5rem,6vh)] md:h-[min(3.6rem,6.5vh)] text-xs min-[360px]:text-sm sm:text-base flex-1 shadow-sm active:scale-95 outline-none focus:outline-none",
                   {
-                    "max-w-[min(3.8rem,7.5vh)] min-[360px]:max-w-[min(4.2rem,8vh)] sm:max-w-[min(4.5rem,8.5vh)] md:max-w-[min(4.8rem,9vh)] px-0.5 min-[360px]:px-1 text-[9px] min-[360px]:text-[10px] sm:text-xs tracking-tight sm:tracking-wider": isSpecial,
-                    "max-w-[min(2.6rem,5vh)] sm:max-w-[min(2.8rem,5.5vh)] md:max-w-[min(3rem,6vh)]": !isSpecial,
+                    "max-w-[min(3.8rem,6.5vh)] min-[360px]:max-w-[min(4.2rem,7vh)] sm:max-w-[min(4.5rem,7.5vh)] md:max-w-[min(4.8rem,8vh)] px-0.5 min-[360px]:px-1 text-[9px] min-[360px]:text-[10px] sm:text-xs tracking-tight sm:tracking-wider": isSpecial,
+                    "max-w-[min(2.6rem,4.5vh)] sm:max-w-[min(2.8rem,5vh)] md:max-w-[min(3rem,5.5vh)]": !isSpecial,
                     "bg-[var(--key-bg)] hover:brightness-110 text-[var(--key-text)]": !state,
                     "bg-[var(--tile-bg-absent)] text-[var(--tile-text-absent)] opacity-60": state === 'absent',
                     "bg-[#0284c7] text-white shadow-md": state === 'present' && colorblindMode,
