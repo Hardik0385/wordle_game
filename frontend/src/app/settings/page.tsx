@@ -71,9 +71,9 @@ export default function SettingsPage() {
     toggleHardMode();
     const next = !hardMode;
     if (next) {
-      toast.success('Hard Mode enabled! All hints must be used.');
+      toast.success('Hard Mode enabled! All hints must be used.', { id: 'settings-toast' });
     } else {
-      toast('Hard Mode disabled');
+      toast('Hard Mode disabled', { id: 'settings-toast' });
     }
   };
 
@@ -82,10 +82,10 @@ export default function SettingsPage() {
     setWordLength(length);
     const gameState = useGameStore.getState();
     if (gameState.status === 'playing' && gameState.guesses.length > 0) {
-      toast.success(`Word length set to ${length} letters! Will apply to your next game.`);
+      toast.success(`Word length set to ${length} letters! Will apply to your next game.`, { id: 'settings-toast' });
     } else {
       gameState.resetGame(undefined, undefined, length);
-      toast.success(`Word length set to ${length} letters!`);
+      toast.success(`Word length set to ${length} letters!`, { id: 'settings-toast' });
     }
   };
 
@@ -95,9 +95,9 @@ export default function SettingsPage() {
     const next = !soundEnabled;
     if (next) {
       sounds.playKeyClick();
-      toast.success('Sound effects enabled');
+      toast.success('Sound effects enabled', { id: 'settings-toast' });
     } else {
-      toast('Sound effects disabled');
+      toast('Sound effects disabled', { id: 'settings-toast' });
     }
   };
 
@@ -106,22 +106,22 @@ export default function SettingsPage() {
     toggleShowTimer();
     const next = !showTimer;
     if (next) {
-      toast.success('Live timer enabled in all games');
+      toast.success('Live timer enabled in all games', { id: 'settings-toast' });
     } else {
-      toast('Live timer disabled');
+      toast('Live timer disabled', { id: 'settings-toast' });
     }
   };
 
   // 7. Appearance Mode Handler
   const handleAppearanceChange = (mode: 'dark' | 'light') => {
     setAppearance(mode);
-    toast.success(`Appearance set to ${mode} mode`);
+    toast.success(`Appearance set to ${mode} mode`, { id: 'settings-toast' });
   };
 
   // 8. Animation Speed Handler
   const handleAnimationSpeedChange = (speed: 'normal' | 'fast' | 'off') => {
     setAnimationSpeed(speed);
-    toast.success(`Animation speed set to ${speed}`);
+    toast.success(`Animation speed set to ${speed}`, { id: 'settings-toast' });
   };
 
   return (
@@ -389,10 +389,10 @@ export default function SettingsPage() {
                 setGameLanguage(lang);
                 const gameState = useGameStore.getState();
                 if (gameState.status === 'playing' && gameState.guesses.length > 0) {
-                  toast.success(`Game language set to ${lang}! Will apply to your next game.`);
+                  toast.success(`Game language set to ${lang}! Will apply to your next game.`, { id: 'settings-toast' });
                 } else {
                   gameState.resetGame();
-                  toast.success(`Game language set to ${lang}`);
+                  toast.success(`Game language set to ${lang}`, { id: 'settings-toast' });
                 }
               }}
               className="bg-[var(--background)] text-[var(--foreground)] text-xs font-bold px-3 py-2 rounded-xl border border-[var(--surface-border)] focus:outline-none cursor-pointer"
@@ -417,7 +417,7 @@ export default function SettingsPage() {
               onChange={(e) => {
                 const lang = e.target.value;
                 setInterfaceLanguage(lang);
-                toast.success(`Interface language set to ${lang}`);
+                toast.success(`Interface language set to ${lang}`, { id: 'settings-toast' });
               }}
               className="bg-[var(--background)] text-[var(--foreground)] text-xs font-bold px-3 py-2 rounded-xl border border-[var(--surface-border)] focus:outline-none cursor-pointer"
             >
