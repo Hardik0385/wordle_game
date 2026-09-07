@@ -26,6 +26,13 @@ export function Board() {
   const { animationSpeed, interfaceLanguage } = useSettingsStore();
   const [shake, setShake] = useState(false);
 
+  // Clamp hintsRemaining to 1 (fixes older cached local storage states that had 2 hints)
+  useEffect(() => {
+    if (hintsRemaining > 1) {
+      useGameStore.setState({ hintsRemaining: 1 });
+    }
+  }, [hintsRemaining]);
+
   const isFog = gameMode === 'chaos' && chaosModifier?.id === 'fog';
 
   useEffect(() => {
