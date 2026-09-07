@@ -117,7 +117,7 @@ export function Board() {
       </div>
 
       {/* Floating Free Hint Capsule & Position Badges */}
-      <div className="w-full max-w-[20rem] flex items-center justify-between gap-1.5 mt-1 sm:mt-2.5">
+      <div className="w-full max-w-[20rem] flex items-center justify-between gap-1.5 mt-1 sm:mt-2.5 md:mb-6">
         <div className="flex items-center gap-1 flex-wrap">
           {hints.map((h, idx) => (
             <span 
