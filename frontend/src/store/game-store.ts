@@ -790,11 +790,6 @@ export const useGameStore = create<GameState>()(
     }),
     {
       name: 'wordly-game-storage',
-      partialize: (state) => {
-        // Exclude resultModalSeen from storage — it must always start as false on page load
-        const { resultModalSeen, dismissResultModal, ...rest } = state as any;
-        return rest;
-      },
     }
   )
 );

@@ -10,7 +10,7 @@ import { Play, Calendar, LayoutGrid, Swords, Trophy, Lock } from 'lucide-react';
 
 export default function Home() {
   const { stats } = usePlayerStore();
-  const { user, profile, signInWithGoogle } = useAuth();
+  const { user, profile, loading, signInWithGoogle } = useAuth();
   const interfaceLanguage = useSettingsStore(state => state.interfaceLanguage);
 
   const winPercentage = stats.gamesPlayed > 0 
@@ -84,7 +84,7 @@ export default function Home() {
       {/* Main Action Links with Blur Backdrop when unauthenticated */}
       <div className="relative w-full">
         {/* Buttons (blurred & non-interactive when logged out) */}
-        <div className={`w-full flex flex-col gap-3 transition-all duration-300 ${!user ? 'filter blur-[7px] opacity-35 pointer-events-none select-none scale-[0.99]' : ''}`}>
+        <div className={`w-full flex flex-col gap-3 transition-all duration-300 ${!user && !loading ? 'filter blur-[7px] opacity-35 pointer-events-none select-none scale-[0.99]' : ''}`}>
           <Link 
             href="/play" 
             className="w-full bg-[#2ec47d] hover:bg-[#28b371] text-black py-5 rounded-3xl flex items-center justify-center gap-3 text-lg font-black hover:scale-[1.01] active:scale-[0.99] transition-all shadow-xl shadow-[#2ec47d]/20"
@@ -124,7 +124,7 @@ export default function Home() {
         </div>
 
         {/* Floating Glassmorphic Login Overlay when logged out */}
-        {!user && (
+        {!user && !loading && (
           <div className="absolute inset-0 flex items-center justify-center p-3 sm:p-6 z-10 animate-in fade-in zoom-in-95 duration-300">
             <div 
               style={{

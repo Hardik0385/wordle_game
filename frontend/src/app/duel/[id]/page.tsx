@@ -272,6 +272,13 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
       ? 'w-12 h-12 sm:w-14 sm:h-14 text-lg sm:text-xl'
       : 'w-10 h-10 sm:w-12 sm:h-12 text-base sm:text-lg';
 
+  const opponentTileSize =
+    wordLength === 6
+      ? 'w-5 h-5 sm:w-8 sm:h-8 text-[10px] sm:text-xs'
+      : wordLength === 4
+      ? 'w-7 h-7 sm:w-10 sm:h-10 text-xs sm:text-sm'
+      : 'w-6 h-6 sm:w-9 sm:h-9 text-[11px] sm:text-sm';
+
   return (
     <main className="p-3 sm:p-6 max-w-4xl mx-auto flex flex-col gap-4 outline-none select-none">
       {/* Header Bar */}
@@ -440,10 +447,10 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
         </div>
 
         {/* Opponent's Board (Live fog/progress view) */}
-        <div className="flex flex-col items-center gap-3 bg-[var(--surface)] p-4 sm:p-5 rounded-3xl border border-[var(--surface-border)] opacity-90 shadow-sm">
+        <div className="flex flex-col items-center gap-2 sm:gap-3 bg-[var(--surface)] p-3 sm:p-5 rounded-3xl border border-[var(--surface-border)] opacity-90 shadow-sm">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
-              <span className="font-black text-sm text-blue-500 uppercase tracking-wider">{opponentName}</span>
+              <span className="font-black text-xs sm:text-sm text-blue-500 uppercase tracking-wider">{opponentName}</span>
               {opponentSolved && <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#2ec47d]/20 text-[#2ec47d]">SOLVED</span>}
             </div>
             <span className="text-xs font-bold text-[var(--foreground-muted)]">
@@ -451,13 +458,13 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
             </span>
           </div>
 
-          <div className="flex flex-col gap-1.5 sm:gap-2">
+          <div className="flex flex-col gap-1 sm:gap-2">
             {rowsArray.map((rowIdx) => {
               const guess = opponentGuesses[rowIdx] || '';
               const isSubmitted = rowIdx < opponentGuesses.length;
 
               return (
-                <div key={rowIdx} className="flex gap-1.5 sm:gap-2">
+                <div key={rowIdx} className="flex gap-1 sm:gap-2">
                   {colsArray.map((colIdx) => {
                     const char = guess[colIdx] || '';
                     let bgColor = 'bg-transparent border border-[var(--surface-border)]';
@@ -475,7 +482,7 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
                     return (
                       <div
                         key={colIdx}
-                        className={`${tileSize} rounded-xl flex items-center justify-center font-black uppercase transition-all ${bgColor}`}
+                        className={`${opponentTileSize} rounded-md sm:rounded-xl flex items-center justify-center font-black uppercase transition-all ${bgColor}`}
                       >
                         {isSubmitted ? '•' : ''}
                       </div>
@@ -486,7 +493,7 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
             })}
           </div>
 
-          <span className="text-[11px] text-[var(--foreground-muted)]">
+          <span className="text-[10px] sm:text-[11px] text-[var(--foreground-muted)]">
             Live opponent progress (fog of war)
           </span>
         </div>
