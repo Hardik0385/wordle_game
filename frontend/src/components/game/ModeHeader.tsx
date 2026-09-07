@@ -13,7 +13,9 @@ import {
   Trophy, 
   Sparkles, 
   Settings, 
-  Shuffle 
+  Shuffle,
+  Heart,
+  Skull
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useState } from 'react';
@@ -169,8 +171,12 @@ export function ModeHeader({ onOpenCustomModal }: ModeHeaderProps) {
           <div className="flex items-center gap-1">
             <span className="text-xs font-bold text-[#8e95a5] uppercase mr-1">Lives:</span>
             {Array.from({ length: survivalMaxLives }).map((_, i) => (
-              <span key={i} className="text-base transition-transform hover:scale-125">
-                {i < survivalLives ? '❤️' : '🖤'}
+              <span key={i} className="flex items-center justify-center w-5 h-5 transition-transform hover:scale-125">
+                {i < survivalLives ? (
+                  <Heart size={16} className="text-red-500 fill-red-500 animate-pulse" />
+                ) : (
+                  <Skull size={16} className="text-gray-600 animate-pulse" />
+                )}
               </span>
             ))}
           </div>
