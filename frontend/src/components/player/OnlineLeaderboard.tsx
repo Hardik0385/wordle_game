@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { Trophy, Medal, Award, Flame, Loader2 } from 'lucide-react';
+import { Trophy, Medal, Award, Flame, Loader2, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 interface LeaderboardUser {
@@ -18,6 +18,7 @@ interface LeaderboardUser {
 export function OnlineLeaderboard() {
   const [leaders, setLeaders] = useState<LeaderboardUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<LeaderboardUser | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -82,10 +83,11 @@ export function OnlineLeaderboard() {
         return (
           <div
             key={player.uid}
-            className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${
+            onClick={() => setSelectedUser(player)}
+            className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${
               isCurrent
                 ? 'bg-[#2ec47d]/10 border-[#2ec47d] shadow-sm'
-                : 'bg-[var(--surface)] border-[var(--surface-border)] hover:border-[var(--foreground-muted)]/40'
+                : 'bg-[var(--surface)] border-[var(--surface-border)] hover:border-[var(--foreground-muted)]/40 hover:bg-[var(--background)]'
             }`}
           >
             {/* Rank badge */}
@@ -146,6 +148,63 @@ export function OnlineLeaderboard() {
           </div>
         );
       })}
+
+      {/* Player Stats Popup Modal */}
+      {selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={() => setSelectedUser(null)}>
+          <div 
+            className="bg-[var(--surface)] border border-[var(--surface-border)] rounded-3xl p-6 sm:p-8 w-full max-w-sm shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setSelectedUser(null)}
+              className="absolute top-4 right-4 p-2 text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background)] rounded-full transition-colors"
+            >
+              <X size={20} />
+            </button>
+            
+            <div className="flex flex-col items-center text-center gap-3 mt-2">
+              {/* Avatar */}
+              {selectedUser.photoURL ? (
+                <img
+                  src={selectedUser.photoURL}
+                  alt={selectedUser.displayName || 'Player'}
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-[#2ec47d]/20 object-cover"
+                />
+              ) : (
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-[#2ec47d] to-[#10b981] flex items-center justify-center font-black text-white text-3xl sm:text-4xl shadow-lg border-4 border-[var(--background)]">
+                  {selectedUser.displayName ? selectedUser.displayName[0].toUpperCase() : 'P'}
+                </div>
+              )}
+              
+              <div className="flex flex-col items-center">
+                <h3 className="text-xl font-black text-[var(--foreground)]">{selectedUser.displayName}</h3>
+                <div className="flex items-center gap-1.5 font-bold text-[#2ec47d] mt-1">
+                  <Flame size={18} />
+                  <span>{selectedUser.rating} ELO Rating</span>
+                </div>
+              </div>
+
+              <div className="w-full grid grid-cols-2 gap-3 mt-4">
+                <div className="bg-[var(--background)] rounded-2xl p-4 flex flex-col items-center justify-center border border-[var(--surface-border)]">
+                  <span className="text-2xl font-black text-[var(--foreground)]">{selectedUser.gamesPlayed}</span>
+                  <span className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wider mt-1">Played</span>
+                </div>
+                <div className="bg-[var(--background)] rounded-2xl p-4 flex flex-col items-center justify-center border border-[var(--surface-border)]">
+                  <span className="text-2xl font-black text-[var(--foreground)]">
+                    {selectedUser.gamesPlayed > 0 ? Math.round((selectedUser.gamesWon / selectedUser.gamesPlayed) * 100) : 0}%
+                  </span>
+                  <span className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wider mt-1">Win Rate</span>
+                </div>
+                <div className="col-span-2 bg-[#2ec47d]/10 rounded-2xl p-4 flex flex-col items-center justify-center border border-[#2ec47d]/20">
+                  <span className="text-2xl font-black text-[#2ec47d]">{selectedUser.gamesWon}</span>
+                  <span className="text-[10px] font-bold text-[#2ec47d]/80 uppercase tracking-wider mt-1">Total Wins</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
