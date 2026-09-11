@@ -57,20 +57,32 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
   useEffect(() => {
     if (!roomId) return;
 
+    let disconnectTimeout: NodeJS.Timeout;
+
     const unsubscribe = onSnapshot(doc(db, 'rooms', roomId), (snapshot) => {
       if (snapshot.exists()) {
         setRoomData(snapshot.data());
         isInitialLoad.current = false;
+        clearTimeout(disconnectTimeout);
       } else {
         if (isInitialLoad.current) {
           toast.error('Duel room not found', { id: 'duel-error' });
+          router.push('/duel');
+        } else {
+          // Delay to prevent aggressive kicks during mobile tab-switching/connection blips
+          disconnectTimeout = setTimeout(() => {
+            toast.error('Room closed or connection lost.', { id: 'duel-closed' });
+            router.push('/duel');
+          }, 3000);
         }
-        router.push('/duel');
       }
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      clearTimeout(disconnectTimeout);
+    };
   }, [roomId]);
 
   const isPlayer1 = user?.uid === roomData?.player1Id;
@@ -158,12 +170,16 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
           updates.player1Solved = true;
           updates.winnerId = roomData.player1Id;
           updates.status = 'finished';
+        } else if (myGuesses.length + 1 >= maxGuesses && opponentGuesses.length >= maxGuesses && !opponentSolved) {
+          updates.status = 'finished';
         }
       } else if (isPlayer2) {
         updates.player2Guesses = arrayUnion(upperGuess);
         if (isCorrect) {
           updates.player2Solved = true;
           updates.winnerId = roomData.player2Id;
+          updates.status = 'finished';
+        } else if (myGuesses.length + 1 >= maxGuesses && opponentGuesses.length >= maxGuesses && !opponentSolved) {
           updates.status = 'finished';
         }
       }
@@ -373,7 +389,7 @@ export default function DuelMatchPage({ params }: DuelMatchPageProps) {
               ? `${opponentName} WON!`
               : isTimeOut
               ? "TIME'S UP! DRAW!"
-              : 'MATCH FINISHED!'}
+              : 'DRAW! NOBODY GUESSED IT!'}
           </h2>
           <span className="text-sm font-semibold opacity-90">
             The word was: <span className="font-black uppercase tracking-widest">{targetWord}</span>

@@ -150,6 +150,7 @@ interface GameState {
   clearError: () => void;
   useHint: () => void;
   tickTimer: () => void;
+  forfeitGame: () => void;
   forfeitTimedGameIfActive: () => void;
   nextSurvivalWord: () => void;
   nextEndlessStage: () => void;
@@ -610,13 +611,22 @@ export const useGameStore = create<GameState>()(
 
         if (isTimedChallenge) {
           if (timerSeconds <= 1) {
+            const updatedSavedGames = { ...get().savedGamesByMode };
+            if (updatedSavedGames[gameMode]) {
+              updatedSavedGames[gameMode] = {
+                ...updatedSavedGames[gameMode]!,
+                timerSeconds: 0,
+                status: 'lost',
+              };
+            }
+
             set({
               timerSeconds: 0,
               timerRunning: false,
               status: 'lost',
               error: `Time's up! The word was: ${targetWord}`,
-              // Show the result modal fresh
               resultModalSeen: false,
+              savedGamesByMode: updatedSavedGames,
             });
             usePlayerStore.getState().recordGameResult(false, get().guesses.length);
           } else {
@@ -706,6 +716,28 @@ export const useGameStore = create<GameState>()(
           hintsRemaining: 2,
           elapsedSeconds: 0,
         });
+      },
+
+      forfeitGame: () => {
+        const { status, gameMode, guesses } = get();
+        if (status !== 'playing') return;
+
+        const updatedSavedGames = { ...get().savedGamesByMode };
+        if (updatedSavedGames[gameMode]) {
+          updatedSavedGames[gameMode] = {
+            ...updatedSavedGames[gameMode]!,
+            status: 'lost',
+          };
+        }
+
+        set({
+          status: 'lost',
+          timerRunning: false,
+          resultModalSeen: false,
+          savedGamesByMode: updatedSavedGames,
+        });
+
+        usePlayerStore.getState().recordGameResult(false, guesses.length);
       },
       
       clearError: () => set({ error: null }),

@@ -17,6 +17,7 @@ export function Board() {
     error, 
     clearError, 
     useHint, 
+    forfeitGame,
     hintsRemaining,
     hints,
     status,
@@ -130,23 +131,42 @@ export function Board() {
           ))}
         </div>
 
-        <button 
-          type="button"
-          tabIndex={-1}
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={(e) => {
-            (e.currentTarget as HTMLButtonElement)?.blur();
-            useHint();
-          }}
-          disabled={hintsRemaining <= 0 || status !== 'playing'}
-          className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-black bg-[var(--surface)] hover:bg-[var(--surface-border)] text-[var(--foreground)] border border-[var(--surface-border)] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-md transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed outline-none focus:outline-none shrink-0 ml-auto"
-        >
-          <span className="text-yellow-400 text-xs sm:text-sm">💡</span>
-          <span>{getTranslation(interfaceLanguage, 'hint')}</span>
-          <span className="ml-0.5 px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black bg-yellow-400/20 text-yellow-600 dark:text-yellow-300">
-            {hintsRemaining} {getTranslation(interfaceLanguage, 'free')}
-          </span>
-        </button>
+        <div className="flex items-center gap-2 ml-auto shrink-0">
+          {gameMode !== 'daily' && (
+            <button
+              type="button"
+              tabIndex={-1}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={(e) => {
+                (e.currentTarget as HTMLButtonElement)?.blur();
+                forfeitGame();
+              }}
+              disabled={status !== 'playing'}
+              className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-black bg-[var(--surface)] hover:bg-red-500/10 text-[var(--foreground)] hover:text-red-500 border border-[var(--surface-border)] hover:border-red-500/30 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-md transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed outline-none focus:outline-none"
+            >
+              <span className="text-xs sm:text-sm">🏳️</span>
+              <span>Give Up</span>
+            </button>
+          )}
+
+          <button 
+            type="button"
+            tabIndex={-1}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => {
+              (e.currentTarget as HTMLButtonElement)?.blur();
+              useHint();
+            }}
+            disabled={hintsRemaining <= 0 || status !== 'playing'}
+            className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-black bg-[var(--surface)] hover:bg-[var(--surface-border)] text-[var(--foreground)] border border-[var(--surface-border)] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-md transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed outline-none focus:outline-none"
+          >
+            <span className="text-yellow-400 text-xs sm:text-sm">💡</span>
+            <span>{getTranslation(interfaceLanguage, 'hint')}</span>
+            <span className="ml-0.5 px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black bg-yellow-400/20 text-yellow-600 dark:text-yellow-300">
+              {hintsRemaining} {getTranslation(interfaceLanguage, 'free')}
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   );
