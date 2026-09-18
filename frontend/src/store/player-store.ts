@@ -88,7 +88,17 @@ export const usePlayerStore = create<PlayerState>()(
 
           // Daily streak: check if yesterday was also completed
           // We just always increment here since the game-store blocks replaying
-          newStats.dailyStreak = (newStats.dailyStreak || 0) + 1;
+          //newStats.dailyStreak = (newStats.dailyStreak || 0) + 1;
+          const yesterday = new Date(dateIST);
+          yesterday.setDate(yesterday.getDate() - 1);
+          
+          const yesterdayDate = yesterday.toISOString().split('T')[0];
+          
+          if (newStats.lastDailyCompletedDate === yesterdayDate) {
+              newStats.dailyStreak = (newStats.dailyStreak || 0) + 1;
+          } else {
+              newStats.dailyStreak = 1;
+          }
           newStats.dailyBestStreak = Math.max(newStats.dailyBestStreak || 0, newStats.dailyStreak);
           
           // Also update overall streak
